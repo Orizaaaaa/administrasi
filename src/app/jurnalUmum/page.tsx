@@ -17,6 +17,7 @@ import { camera } from '../image'
 const JurnalUmum = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
+    const [date, setDate] = useState(null);
     const [form, setForm] = useState({
         nama_transaksi: '',
         debit: '',
@@ -92,6 +93,9 @@ const JurnalUmum = () => {
                 <div className="total mt-4">
                     <h1>Total Debit : Rp. 1.000.000</h1>
                     <h1>Total Kredit: Rp. 1.000.000</h1>
+                </div>
+                <div className="flex justify-end">
+                    <DatePicker size='sm' onChange={(e: any) => setDate(e)} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                 </div>
 
             </Card>
