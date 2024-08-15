@@ -2,11 +2,15 @@
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import Card from '@/components/elements/card/Card'
 import InputForm from '@/components/elements/input/InputForm'
+import ModalDefault from '@/components/fragemnts/modal/modal'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Autocomplete, AutocompleteItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
 import React, { useState } from 'react'
+import { FaPenToSquare } from 'react-icons/fa6'
+import { MdOutlineDelete } from 'react-icons/md'
 
 const ListAccount = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const [form, setForm] = useState({
         name: '',
         number: '',
@@ -37,12 +41,16 @@ const ListAccount = () => {
 
     console.log(form);
 
+    const modalOpen = () => {
+        onOpen()
+    }
+
     return (
         <DefaultLayout>
             <Card>
                 <h1 className='text-xl font-medium' >Tambah nama account</h1>
                 <form className='mt-7' action="">
-                    <InputForm className='bg-bone' htmlFor="name" title="Name" type="text" onChange={handleChange} value={form.name} />
+                    <InputForm className='bg-bone' htmlFor="name" title="Nama account" type="text" onChange={handleChange} value={form.name} />
                     <InputForm className='bg-bone' htmlFor="number" title="Nomor account" type="text" onChange={handleChange} value={form.number} />
 
                     <div className="space-y-2">
@@ -51,7 +59,7 @@ const ListAccount = () => {
                             clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, account: '' }) }}
                             onSelectionChange={(e: any) => handleDropdownSelection(e)}
                             defaultItems={dataDropdown}
-                            label="masukan type account"
+                            aria-label='dropdown'
                             className="max-w-xs border-2 border-primary rounded-lg "
                             size='sm'
                         >
@@ -63,37 +71,42 @@ const ListAccount = () => {
                         <ButtonPrimary className="py-2 px-4 rounded-md font-medium " onClick={() => console.log(form)} >Selesai</ButtonPrimary>
                     </div>
                 </form>
-
-                <Table className='mt-7 border-hidden' aria-label="Example static collection table">
-                    <TableHeader>
-                        <TableColumn>NAME</TableColumn>
-                        <TableColumn>ROLE</TableColumn>
-                        <TableColumn>STATUS</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow key="1">
-                            <TableCell>Tony Reichert</TableCell>
-                            <TableCell>CEO</TableCell>
-                            <TableCell>Active</TableCell>
-                        </TableRow>
-                        <TableRow key="2">
-                            <TableCell>Zoey Lang</TableCell>
-                            <TableCell>Technical Lead</TableCell>
-                            <TableCell>Paused</TableCell>
-                        </TableRow>
-                        <TableRow key="3">
-                            <TableCell>Jane Fisher</TableCell>
-                            <TableCell>Senior Developer</TableCell>
-                            <TableCell>Active</TableCell>
-                        </TableRow>
-                        <TableRow key="4">
-                            <TableCell>William Howard</TableCell>
-                            <TableCell>Community Manager</TableCell>
-                            <TableCell>Vacation</TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
             </Card>
+            <Table className='mt-7 border-hidden' aria-label="Example static collection table">
+                <TableHeader>
+                    <TableColumn>NAMA ACCOUNT</TableColumn>
+                    <TableColumn>NO ACCOUNT</TableColumn>
+                    <TableColumn>TYPE ACCOUNT</TableColumn>
+                    <TableColumn>ACTION</TableColumn>
+                </TableHeader>
+                <TableBody>
+                    <TableRow key="1">
+                        <TableCell>Kas</TableCell>
+                        <TableCell>101</TableCell>
+                        <TableCell>Aset</TableCell>
+                        <TableCell>
+                            <div className="flex w-full justify-start gap-2 items-center">
+                                <button onClick={modalOpen} ><FaPenToSquare size={20} /></button>
+                                <button><MdOutlineDelete size={24} color='red' /></button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow key="2">
+                        <TableCell>Kas</TableCell>
+                        <TableCell>101</TableCell>
+                        <TableCell>Aset</TableCell>
+                        <TableCell>
+                            <div className="flex w-full justify-start gap-2 items-center">
+                                <button onClick={modalOpen} ><FaPenToSquare size={20} /></button>
+                                <button><MdOutlineDelete size={24} color='red' /></button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+            <ModalDefault isOpen={isOpen} onClose={onClose} >
+                <h1>Update Transaksi</h1>
+            </ModalDefault>
         </DefaultLayout >
 
     )
