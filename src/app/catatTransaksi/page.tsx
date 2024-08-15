@@ -74,28 +74,18 @@ const CatatTransaksi = () => {
         }
     };
 
-    console.log(form);
-    function parseDate(data: DateData): string {
-        const { year, month, day } = data;
-
-        // Format bulan dan hari menjadi dua digit
-        const formattedMonth = month.toString().padStart(2, '0');
-        const formattedDay = day.toString().padStart(2, '0');
-
-        return `${formattedMonth}/${formattedDay}/${year}`;
-    }
-
     return (
         <DefaultLayout>
             <Card>
                 <h1 className='text-xl font-medium' >Pencatatan Transaksi</h1>
                 <p className='text-slate-500 text-small' >Pencatatan transaksi disini akan masuk dan di catat ke dalam jurnal umum</p>
+
                 <form action="" className='mt-5' >
                     <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={handleChange}
                         value={form.nama_transaksi} />
                     <div className="mt-4 space-y-2">
                         <h2>Tanggal</h2>
-                        <DatePicker onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
+                        <DatePicker size='sm' onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                     </div>
                     <div className="flex gap-5 my-4">
                         <div className="space-y-2">
