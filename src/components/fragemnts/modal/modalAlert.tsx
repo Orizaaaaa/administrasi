@@ -1,4 +1,6 @@
-
+import React from 'react'
+import { warning } from '@/app/image'
+import Image from 'next/image'
 import { Modal, ModalBody, ModalContent } from '@nextui-org/react'
 
 type Props = {
@@ -9,7 +11,7 @@ type Props = {
     className?: string
 }
 
-const ModalDefault = ({ isOpen, onClose, children, closeButton, className }: Props) => {
+const ModalAlert = ({ isOpen, onClose, children, closeButton, className }: Props) => {
     return (
         <Modal
             size={'xl'}
@@ -21,6 +23,9 @@ const ModalDefault = ({ isOpen, onClose, children, closeButton, className }: Pro
             <ModalContent>
                 <>
                     <ModalBody className={`overflow-x-hidden ${className}`}>
+                        <div className="flex justify-center items-center">
+                            <Image className="w-10 h-10" src={warning} alt="warning" />
+                        </div>
                         {children}
                     </ModalBody>
                 </>
@@ -29,4 +34,4 @@ const ModalDefault = ({ isOpen, onClose, children, closeButton, className }: Pro
     )
 }
 
-export default ModalDefault
+export default ModalAlert

@@ -5,9 +5,13 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragemnts/modal/modal'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { Autocomplete, AutocompleteItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
+import Image from 'next/image'
 import React, { useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
+import { warning } from '../image'
+import ButtonSecondary from '@/components/elements/buttonSecondary'
+import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 
 const ListAccount = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -153,10 +157,13 @@ const ListAccount = () => {
                 </form>
             </ModalDefault>
 
-            <ModalDefault isOpen={openDelete} onClose={onCloseDelete} >
-                <h1>Hapus</h1>
-
-            </ModalDefault>
+            <ModalAlert isOpen={openDelete} onClose={onCloseDelete} >
+                <h1 className='text-lg' >Apakah anda yakin akan menghapus akun ini ? </h1>
+                <div className="flex justify-end gap-3">
+                    <ButtonPrimary className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
+                    <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onCloseDelete}>Tidak</ButtonSecondary>
+                </div>
+            </ModalAlert>
         </DefaultLayout >
 
     )
