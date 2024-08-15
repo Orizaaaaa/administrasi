@@ -11,21 +11,42 @@ import { MdOutlineDelete } from 'react-icons/md'
 
 const ListAccount = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
+    const [formUpdate, setFormUpdate] = useState({
+        name: '',
+        number: '',
+        account: '',
+    })
+
     const [form, setForm] = useState({
         name: '',
         number: '',
         account: '',
     })
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: string) => {
         const { name, value, } = e.target;
-        setForm({ ...form, [name]: value });
+        if (option === 'formUpdate') {
+            setFormUpdate({ ...formUpdate, [name]: value });
+        } else {
+            setForm({ ...form, [name]: value });
+        }
+
     }
-    const handleDropdownSelection = (selectedValue: string) => {
-        setForm((prevForm) => ({
-            ...prevForm,
-            account: selectedValue,
-        }));
+
+    const handleDropdownSelection = (selectedValue: string, option: string) => {
+        if (option === 'formUpdate') {
+            setFormUpdate((prevForm) => ({
+                ...prevForm,
+                account: selectedValue,
+            }))
+        } else {
+            setForm((prevForm) => ({
+                ...prevForm,
+                account: selectedValue,
+            }));
+        }
+
     };
 
     const dataDropdown = [
@@ -39,25 +60,27 @@ const ListAccount = () => {
         { label: "biaya lain lain", value: "8" },
     ];
 
-    console.log(form);
-
-    const modalOpen = () => {
+    const modalUpdateOpen = () => {
         onOpen()
+    }
+
+    const modalDeleteOpen = () => {
+        onOpenDelete()
     }
 
     return (
         <DefaultLayout>
             <Card>
-                <h1 className='text-xl font-medium' >Tambah nama account</h1>
+                <h1 className='text-xl font-medium' >Tambah account</h1>
                 <form className='mt-7' action="">
-                    <InputForm className='bg-bone' htmlFor="name" title="Nama account" type="text" onChange={handleChange} value={form.name} />
-                    <InputForm className='bg-bone' htmlFor="number" title="Nomor account" type="text" onChange={handleChange} value={form.number} />
+                    <InputForm className='bg-bone' htmlFor="name" title="Nama account" type="text" onChange={(e: any) => handleChange(e, 'form')} value={form.name} />
+                    <InputForm className='bg-bone' htmlFor="number" title="Nomor account" type="text" onChange={(e: any) => handleChange(e, 'form')} value={form.number} />
 
                     <div className="space-y-2">
                         <h3>Pilih Type Account</h3>
                         <Autocomplete
                             clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, account: '' }) }}
-                            onSelectionChange={(e: any) => handleDropdownSelection(e)}
+                            onSelectionChange={(e: any) => handleDropdownSelection(e, 'form')}
                             defaultItems={dataDropdown}
                             aria-label='dropdown'
                             className="max-w-xs border-2 border-primary rounded-lg "
@@ -86,8 +109,8 @@ const ListAccount = () => {
                         <TableCell>Aset</TableCell>
                         <TableCell>
                             <div className="flex w-full justify-start gap-2 items-center">
-                                <button onClick={modalOpen} ><FaPenToSquare size={20} /></button>
-                                <button><MdOutlineDelete size={24} color='red' /></button>
+                                <button onClick={modalUpdateOpen} ><FaPenToSquare size={20} /></button>
+                                <button onClick={modalDeleteOpen} ><MdOutlineDelete size={24} color='red' /></button>
                             </div>
                         </TableCell>
                     </TableRow>
@@ -97,15 +120,42 @@ const ListAccount = () => {
                         <TableCell>Aset</TableCell>
                         <TableCell>
                             <div className="flex w-full justify-start gap-2 items-center">
-                                <button onClick={modalOpen} ><FaPenToSquare size={20} /></button>
-                                <button><MdOutlineDelete size={24} color='red' /></button>
+                                <button onClick={modalUpdateOpen} ><FaPenToSquare size={20} /></button>
+                                <button onClick={modalDeleteOpen} ><MdOutlineDelete size={24} color='red' /></button>
                             </div>
                         </TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
+
             <ModalDefault isOpen={isOpen} onClose={onClose} >
-                <h1>Update Transaksi</h1>
+                <h1 className='font-medium' >Update akun</h1>
+                <form action="">
+                    <InputForm className='bg-bone' htmlFor="name" title="Nama account" type="text" onChange={(e: any) => handleChange(e, 'formUpdate')} value={formUpdate.name} />
+                    <InputForm className='bg-bone' htmlFor="number" title="Nomor account" type="text" onChange={(e: any) => handleChange(e, 'formUpdate')} value={formUpdate.number} />
+
+                    <div className="space-y-1">
+                        <h3>Pilih Type Account</h3>
+                        <Autocomplete
+                            clearButtonProps={{ size: 'sm', onClick: () => setFormUpdate({ ...formUpdate, account: '' }) }}
+                            onSelectionChange={(e: any) => handleDropdownSelection(e, 'formUpdate')}
+                            defaultItems={dataDropdown}
+                            aria-label='dropdown'
+                            className="max-w-xs border-2 border-primary rounded-lg "
+                            size='sm'
+                        >
+                            {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+                        </Autocomplete>
+                    </div>
+                    <div className="flex justify-end">
+                        <ButtonPrimary className="py-2 px-4 rounded-md font-medium " onClick={() => console.log(form)} >Selesai</ButtonPrimary>
+                    </div>
+                </form>
+            </ModalDefault>
+
+            <ModalDefault isOpen={openDelete} onClose={onCloseDelete} >
+                <h1>Hapus</h1>
+
             </ModalDefault>
         </DefaultLayout >
 
