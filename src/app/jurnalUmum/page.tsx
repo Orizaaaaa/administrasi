@@ -94,7 +94,8 @@ const JurnalUmum = () => {
                     <h1>Total Debit : Rp. 1.000.000</h1>
                     <h1>Total Kredit: Rp. 1.000.000</h1>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                    <ButtonSecondary className=' px-4 rounded-md'>Download dalam bentuk Pdf</ButtonSecondary>
                     <DatePicker size='sm' onChange={(e: any) => setDate(e)} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                 </div>
 
