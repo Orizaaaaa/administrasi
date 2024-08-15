@@ -1,14 +1,19 @@
 'use client'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import Card from '@/components/elements/card/Card'
+import ModalDefault from '@/components/fragemnts/modal/modal'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
 import React from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
 
 
 const JurnalUmum = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const modalOpen = () => {
+        onOpen()
+    }
     return (
         <DefaultLayout>
             <Card>
@@ -40,7 +45,7 @@ const JurnalUmum = () => {
                         <TableCell>{''}</TableCell>
                         <TableCell>
                             <div className="flex w-full justify-start gap-2 items-center">
-                                <button><FaPenToSquare size={20} /></button>
+                                <button onClick={modalOpen}><FaPenToSquare size={20} /></button>
                                 <button><MdOutlineDelete size={24} color='red' /></button>
                             </div>
                         </TableCell>
@@ -65,7 +70,7 @@ const JurnalUmum = () => {
                         <TableCell>{''}</TableCell>
                         <TableCell>
                             <div className="flex w-full justify-start gap-2 items-center">
-                                <button><FaPenToSquare size={20} /></button>
+                                <button onClick={modalOpen} ><FaPenToSquare size={20} /></button>
                                 <button><MdOutlineDelete size={24} color='red' /></button>
                             </div>
                         </TableCell>
@@ -83,6 +88,9 @@ const JurnalUmum = () => {
                     </TableRow>
                 </TableBody>
             </Table>
+            <ModalDefault isOpen={isOpen} onClose={onClose} >
+                <h1>Update Transaksi</h1>
+            </ModalDefault>
         </DefaultLayout>
 
     )
