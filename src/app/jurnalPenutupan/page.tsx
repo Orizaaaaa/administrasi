@@ -1,5 +1,6 @@
 'use client'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
+import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { DatePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
@@ -13,7 +14,11 @@ const JurnalPenutupan = () => {
             <Card>
                 <h1 className='font-medium text-lg'>Jurnal Penutupan</h1>
                 <p className='text-small text-gray' > untuk menutup akun-akun nominal (seperti pendapatan dan beban) pada akhir periode  </p>
-                <DatePicker size='sm' aria-label='datepicker' className="max-w-[284px] bg-bone border-2 my-2 border-primary rounded-lg" />
+                <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
+                    <ButtonSecondary className=' px-4 rounded-md w-auto'>Download dalam bentuk Pdf</ButtonSecondary>
+                    <DatePicker size='sm' aria-label='datepicker' className="max-w-[284px] bg-bone border-2 my-2 border-primary rounded-lg" />
+                </div>
+
             </Card>
             <div className='mt-7' >
                 <div className="space-y-3 lg:space-y-0 lg:flex gap-2 items-center mb-2 justify-between">

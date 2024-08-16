@@ -1,4 +1,5 @@
 'use client'
+import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { DatePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
@@ -11,7 +12,10 @@ const LabaRugi = () => {
             <Card>
                 <h1 className='font-medium text-lg' >Laporan Laba Rugi</h1>
                 <p className='text-small text-gray' >Untuk melihat laporan laba bersih atau laba kotor</p>
-                <DatePicker size='sm' aria-label='datepicker' className="max-w-[284px] bg-bone border-2 my-2 border-primary rounded-lg" />
+                <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
+                    <ButtonSecondary className=' px-4 rounded-md w-auto'>Download dalam bentuk Pdf</ButtonSecondary>
+                    <DatePicker size='sm' aria-label='datepicker' className="max-w-[284px] bg-bone border-2 my-2 border-primary rounded-lg" />
+                </div>
 
             </Card>
             <div className="pendapatan mt-4">
