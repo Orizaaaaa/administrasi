@@ -1,7 +1,7 @@
 "use client"
 
 import Card from "@/components/elements/card/Card";
-import { manusiaLaptop } from "../image";
+import { manusiaLaptop, money, outCome, yellowDolar } from "../image";
 import DefaultLayout from "@/components/layouts/DefaultLayout";
 import Image from "next/image";
 import CardBox from "@/components/fragemnts/cardBox/CardBox";;
@@ -24,9 +24,9 @@ const Dashboard: React.FC = () => {
             </Card>
 
             <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                <CardBox />
-                <CardBox />
-                <CardBox />
+                <CardBox image={money} value="7.500.000" title="Saldo saat ini" />
+                <CardBox image={yellowDolar} value="9.500.000" title="Semua pemasukan" />
+                <CardBox image={outCome} value="1.500.000" title="Semua pengeluaran" />
             </div>
             <ChartLine />
         </DefaultLayout>
