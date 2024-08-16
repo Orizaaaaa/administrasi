@@ -50,11 +50,11 @@ const NeracaSaldo = (props: Props) => {
                     </TableRow>
                     <TableRow key="4">
                         <TableCell className='font-bold' >TOTAL KEWAJIBAN DAN MODAL</TableCell>
+                        <TableCell>101</TableCell>
+                        <TableCell>Kewajiban</TableCell>
                         <TableCell>{''}</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell className='font-bold' >1.550.000.000</TableCell>
+                        <TableCell>1.500.000.000</TableCell>
+                        <TableCell className='font-bold' >1.500.000.000</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
