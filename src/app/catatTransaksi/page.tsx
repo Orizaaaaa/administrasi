@@ -6,6 +6,8 @@ import { Autocomplete, AutocompleteItem, DatePicker } from '@nextui-org/react'
 import React, { useState } from 'react'
 import { camera } from '../image'
 import Image from 'next/image'
+import ButtonPrimary from '@/components/elements/buttonPrimary'
+import { AiOutlinePlusCircle } from 'react-icons/ai'
 
 interface DateData {
     calendar: string;
@@ -18,30 +20,44 @@ interface DateData {
 const CatatTransaksi = () => {
     const [form, setForm] = useState({
         nama_transaksi: '',
-        debit: '',
-        kredit: '',
         bukti: null as File | null,
         tanggal: null,
-        nominal: ''
+        transaksi: [
+            {
+                akun: '',
+                debit: '',
+                kredit: '',
+            },
+        ],
+    });
 
-    })
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, } = e.target;
-        setForm({ ...form, [name]: value });
-    }
 
-    const handleDropdownSelection = (selectedValue: string, option: string) => {
-        if (option === 'debit') {
-            setForm((prevForm) => ({
-                ...prevForm,
-                debit: selectedValue,
-            }));
-        } else {
-            setForm((prevForm) => ({
-                ...prevForm,
-                kredit: selectedValue,
-            }));
-        }
+
+
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const { name, value } = e.target;
+        const updatedTransaksi = form.transaksi.map((trans, i) =>
+            i === index ? { ...trans, [name]: value } : trans
+        );
+        setForm({ ...form, transaksi: updatedTransaksi });
+    };
+
+    const addMoreTransaction = () => {
+        setForm((prevForm) => ({
+            ...prevForm,
+            transaksi: [
+                ...prevForm.transaksi,
+                { akun: '', debit: '', kredit: '' },
+            ],
+        }));
+    };
+
+    const handleDropdownSelection = (selectedValue: string, index: number) => {
+        const updatedTransaksi = form.transaksi.map((trans, i) =>
+            i === index ? { ...trans, akun: selectedValue } : trans
+        );
+        setForm({ ...form, transaksi: updatedTransaksi });
     };
 
     const dataDropdown = [
@@ -74,6 +90,9 @@ const CatatTransaksi = () => {
         }
     };
 
+    console.log(form);
+
+
     return (
         <DefaultLayout>
             <Card>
@@ -87,36 +106,49 @@ const CatatTransaksi = () => {
                         <h2>Tanggal</h2>
                         <DatePicker size='sm' onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                     </div>
-                    <div className="flex gap-5 my-4">
-                        <div className="space-y-2">
-                            <h3>Debit</h3>
-                            <Autocomplete
-                                aria-label='dropdown'
-                                clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, debit: '' }) }}
-                                onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
-                                defaultItems={dataDropdown}
-                                className="max-w-xs border-2 border-primary rounded-lg "
-                                size='sm'
-                            >
-                                {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                            </Autocomplete>
-                        </div>
 
-                        <div className="space-y-2">
-                            <h3>Kredit</h3>
-                            <Autocomplete
-                                aria-label='dropdown'
-                                clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, kredit: '' }) }}
-                                onSelectionChange={(e: any) => handleDropdownSelection(e, 'kredit')}
-                                defaultItems={dataDropdown}
-                                className="max-w-xs border-2 border-primary rounded-lg "
-                                size='sm'
-                            >
-                                {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                            </Autocomplete>
+                    {form.transaksi.map((trans, index) => (
+                        <div key={index} className="px-1 my-2">
+                            <div className="lg:flex gap-5">
+                                <div className="space-y-2">
+                                    <h3>Akun</h3>
+                                    <Autocomplete
+                                        aria-label='dropdown'
+                                        clearButtonProps={{ size: 'sm', onClick: () => handleDropdownSelection('', index) }}
+                                        onSelectionChange={(e: any) => handleDropdownSelection(e, index)}
+                                        defaultItems={dataDropdown}
+                                        className="max-w-xs border-2 border-primary rounded-lg"
+                                        size='sm'
+                                    >
+                                        {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+                                    </Autocomplete>
+                                </div>
+                                <InputForm
+                                    className='bg-bone'
+                                    htmlFor="debit"
+                                    title="Debit"
+                                    type="number"
+                                    onChange={(e: any) => handleChange(e, index)}
+                                    value={trans.debit}
+                                />
+                                <InputForm
+                                    className='bg-bone'
+                                    htmlFor="kredit"
+                                    title="Kredit"
+                                    type="number"
+                                    onChange={(e: any) => handleChange(e, index)}
+                                    value={trans.kredit}
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <InputForm className='bg-bone' htmlFor="nominal" title="Nominal Transaksi" type="text" onChange={handleChange} value={form.nominal} />
+                    ))}
+
+                    <AiOutlinePlusCircle
+                        className='button-add-more my-2 cursor-pointer'
+                        size={30}
+                        onClick={addMoreTransaction}
+                    />
+
                     <div className="images ">
                         {form.bukti && form.bukti instanceof Blob ? (
                             <img className="h-[170px] md:h-[300px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.bukti)} />
