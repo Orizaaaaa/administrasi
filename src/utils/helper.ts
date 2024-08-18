@@ -21,30 +21,29 @@ export function formatTitle(text: string, maxLength: number = 20): string {
     }
     return text;
 }
-
-export const statusChange = (value: string) => {
-    if (value === 'Diproses') {
-        return ('bg-[#FF7F0A]')
-    } else if (value === 'Menunggu') {
-        return ('bg-primary')
-    } else if (value === 'Selesai') {
-        return ('bg-lime-700')
+export const changeTypeAccount = (type: number): string => {
+    switch (type) {
+        case 1:
+            return 'Aset';
+        case 2:
+            return 'Kewajiban';
+        case 3:
+            return 'Ekuitas';
+        case 4:
+            return 'Pendapatan';
+        case 5:
+            return 'Biaya Penjualan';
+        case 6:
+            return 'Pengeluaran';
+        case 7:
+            return 'Pendapatan lain lain';
+        case 8:
+            return 'Biaya lain lain';
+        default:
+            return 'Tipe tidak dikenal'; // Mengembalikan nilai default jika tipe tidak ditemukan
     }
-}
+};
 
-export const statusText = (value: string) => {
-    if (value === 'Belum Dibayar') {
-        return ('text-[#FF7F0A]')
-    } else if (value === 'Dibayar') {
-        return ('text-[#FF7F0A]')
-    } else if (value === 'Diproses') {
-        return ('text-[#FF7F0A]')
-    } else if (value === 'Dikirim') {
-        return ('text-primary')
-    } else if (value === 'Selesai') {
-        return ('text-green-500')
-    }
-}
 
 export function formatRupiah(amount: number | undefined): string {
     if (amount === undefined) {

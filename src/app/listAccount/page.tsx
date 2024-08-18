@@ -10,9 +10,10 @@ import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import { url } from '@/api/auth'
 import { fetcher } from '@/api/fetcher'
+import { deleteAcount, updateAccount } from '@/api/acount'
 
 
 
@@ -21,64 +22,90 @@ const ListAccount = () => {
     const { data, error } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });
+    const [deletedId, setDeletedId] = useState('')
+    const [updatedId, setUpdatedId] = useState('')
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
     const [formUpdate, setFormUpdate] = useState({
         name: '',
-        number: '',
-        account: '',
+        account_code: '',
+        account_type: 0,
     })
 
     const [form, setForm] = useState({
         name: '',
-        number: '',
-        account: '',
+        account_code: '',
+        account_type: 0,
     })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: string) => {
         const { name, value, } = e.target;
         if (option === 'formUpdate') {
-            setFormUpdate({ ...formUpdate, [name]: value });
+            setFormUpdate({ ...formUpdate, [name]: (name === 'account_code') ? Number(value) : value });
         } else {
-            setForm({ ...form, [name]: value });
+            setForm({ ...form, [name]: (name === 'account_code') ? Number(value) : value });
         }
 
     }
 
-    const handleDropdownSelection = (selectedValue: string, option: string) => {
+    const handleDropdownSelection = (selectedValue: number, option: string) => {
         if (option === 'formUpdate') {
             setFormUpdate((prevForm) => ({
                 ...prevForm,
-                account: selectedValue,
+                account_type: selectedValue,
             }))
         } else {
             setForm((prevForm) => ({
                 ...prevForm,
-                account: selectedValue,
+                account_type: selectedValue,
             }));
         }
 
     };
 
     const dataDropdown = [
-        { label: "Aset", value: "1", },
-        { label: "Kewajiban", value: "2", },
-        { label: "Ekuitas", value: "3" },
-        { label: "Pendapatan", value: "4" },
-        { label: "Biaya Penjualan", value: "5" },
-        { label: "Pengeluaran", value: "6" },
-        { label: "pendapatan lain lain", value: "7" },
-        { label: "biaya lain lain", value: "8" },
+        { label: "Aset", value: 1, description: "Aset" },
+        { label: "Kewajiban", value: 2, },
+        { label: "Ekuitas", value: 3 },
+        { label: "Pendapatan", value: 4 },
+        { label: "Biaya Penjualan", value: 5 },
+        { label: "Pengeluaran", value: 6 },
+        { label: "Pendapatan lain lain", value: 7 },
+        { label: "Biaya lain lain", value: 8 },
     ];
 
-    const modalUpdateOpen = () => {
+    const modalUpdateOpen = (value: any) => {
+        setFormUpdate({ ...formUpdate, name: value?.name, account_code: value.account_code, account_type: value.account_type })
+        setUpdatedId(value._id)
         onOpen()
     }
 
-    const modalDeleteOpen = () => {
+    const modalDeleteOpen = (value: any) => {
+        setDeletedId(value)
         onOpenDelete()
     }
+
+    const handleDelete = async () => {
+        await deleteAcount(deletedId, () => {
+            onCloseDelete()
+            mutate(`${url}/account/list`);
+        })
+    }
+
+    const handleUpdate = async () => {
+        await updateAccount(updatedId, formUpdate, () => {
+            setFormUpdate({
+                name: '',
+                account_code: '',
+                account_type: 0,
+            })
+            mutate(`${url}/account/list`);
+            onClose()
+        })
+    }
+
     console.log(data);
+
 
 
 
@@ -88,14 +115,15 @@ const ListAccount = () => {
                 <h1 className='text-xl font-medium' >Tambah account</h1>
                 <form className='mt-7' action="">
                     <InputForm className='bg-bone' htmlFor="name" title="Nama account" type="text" onChange={(e: any) => handleChange(e, 'form')} value={form.name} />
-                    <InputForm className='bg-bone' htmlFor="number" title="Nomor account" type="text" onChange={(e: any) => handleChange(e, 'form')} value={form.number} />
+                    <InputForm className='bg-bone' htmlFor="account_code" title="Nomor account" type="number" onChange={(e: any) => handleChange(e, 'form')} value={form.account_code} />
 
                     <div className="space-y-2">
                         <h3>Pilih Type Account</h3>
                         <Autocomplete
-                            clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, account: '' }) }}
+                            clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, account_type: 0 }) }}
                             onSelectionChange={(e: any) => handleDropdownSelection(e, 'form')}
                             defaultItems={dataDropdown}
+                            defaultSelectedKey={form.account_type}
                             aria-label='dropdown'
                             className="max-w-xs border-2 border-primary rounded-lg "
                             size='sm'
@@ -117,43 +145,37 @@ const ListAccount = () => {
                     <TableColumn>ACTION</TableColumn>
                 </TableHeader>
                 <TableBody>
-                    <TableRow key="1">
-                        <TableCell>Kas</TableCell>
-                        <TableCell>101</TableCell>
-                        <TableCell>Aset</TableCell>
-                        <TableCell>
-                            <div className="flex w-full justify-start gap-2 items-center">
-                                <button onClick={modalUpdateOpen} ><FaPenToSquare size={20} /></button>
-                                <button onClick={modalDeleteOpen} ><MdOutlineDelete size={24} color='red' /></button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow key="2">
-                        <TableCell>Kas</TableCell>
-                        <TableCell>101</TableCell>
-                        <TableCell>Aset</TableCell>
-                        <TableCell>
-                            <div className="flex w-full justify-start gap-2 items-center">
-                                <button onClick={modalUpdateOpen} ><FaPenToSquare size={20} /></button>
-                                <button onClick={modalDeleteOpen} ><MdOutlineDelete size={24} color='red' /></button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
+                    {data?.data?.map((item: any, index: number) => (
+                        <TableRow key={index}>
+                            <TableCell>{item.name}</TableCell>
+                            <TableCell>{item.account_code}</TableCell>
+                            <TableCell>{item.account_type}</TableCell>
+                            <TableCell>
+                                <div className="flex w-full justify-start gap-2 items-center">
+                                    <button onClick={() => modalUpdateOpen(item)} ><FaPenToSquare size={20} /></button>
+                                    <button onClick={() => modalDeleteOpen(item?._id)} ><MdOutlineDelete size={24} color='red' /></button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    ))}
                 </TableBody>
             </Table>
 
+
+
             <ModalDefault isOpen={isOpen} onClose={onClose} >
                 <h1 className='font-medium' >Update akun</h1>
-                <form action="">
+                <div >
                     <InputForm className='bg-bone' htmlFor="name" title="Nama account" type="text" onChange={(e: any) => handleChange(e, 'formUpdate')} value={formUpdate.name} />
-                    <InputForm className='bg-bone' htmlFor="number" title="Nomor account" type="text" onChange={(e: any) => handleChange(e, 'formUpdate')} value={formUpdate.number} />
+                    <InputForm className='bg-bone' htmlFor="account_code" title="Nomor account" type="number" onChange={(e: any) => handleChange(e, 'formUpdate')} value={formUpdate.account_code} />
 
                     <div className="space-y-1">
                         <h3>Pilih Type Account</h3>
                         <Autocomplete
-                            clearButtonProps={{ size: 'sm', onClick: () => setFormUpdate({ ...formUpdate, account: '' }) }}
+                            clearButtonProps={{ size: 'sm', onClick: () => setFormUpdate({ ...formUpdate, account_type: 0 }) }}
                             onSelectionChange={(e: any) => handleDropdownSelection(e, 'formUpdate')}
                             defaultItems={dataDropdown}
+                            defaultSelectedKey={formUpdate.account_type}
                             aria-label='dropdown'
                             className="max-w-xs border-2 border-primary rounded-lg "
                             size='sm'
@@ -162,15 +184,15 @@ const ListAccount = () => {
                         </Autocomplete>
                     </div>
                     <div className="flex justify-end">
-                        <ButtonPrimary className="py-2 px-4 rounded-md font-medium " onClick={() => console.log(form)} >Selesai</ButtonPrimary>
+                        <ButtonPrimary className="py-2 px-4 rounded-md font-medium " onClick={handleUpdate} >Selesai</ButtonPrimary>
                     </div>
-                </form>
+                </div>
             </ModalDefault>
 
             <ModalAlert isOpen={openDelete} onClose={onCloseDelete} >
                 <h1 className='text-lg' >Apakah anda yakin akan menghapus akun ini ? </h1>
                 <div className="flex justify-end gap-3">
-                    <ButtonPrimary className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
+                    <ButtonPrimary onClick={handleDelete} className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
                     <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onCloseDelete}>Tidak</ButtonSecondary>
                 </div>
             </ModalAlert>
