@@ -1,5 +1,4 @@
 import axios from "axios";
-export const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then((res) => res.json());
 export const url = process.env.NEXT_PUBLIC_BASE_API
 export const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME
 export const cloudApiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY

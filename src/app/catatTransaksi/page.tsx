@@ -33,8 +33,6 @@ const CatatTransaksi = () => {
 
 
 
-
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target;
         const updatedTransaksi = form.transaksi.map((trans, i) =>
@@ -91,6 +89,7 @@ const CatatTransaksi = () => {
     };
 
     console.log(form);
+
 
 
     return (

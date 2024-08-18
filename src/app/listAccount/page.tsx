@@ -5,15 +5,22 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragemnts/modal/modal'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { Autocomplete, AutocompleteItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
-import Image from 'next/image'
 import React, { useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
-import { warning } from '../image'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
+import useSWR from 'swr'
+import { url } from '@/api/auth'
+import { fetcher } from '@/api/fetcher'
+
+
+
 
 const ListAccount = () => {
+    const { data, error } = useSWR(`${url}/account/list`, fetcher, {
+        keepPreviousData: true,
+    });
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
     const [formUpdate, setFormUpdate] = useState({
@@ -71,6 +78,9 @@ const ListAccount = () => {
     const modalDeleteOpen = () => {
         onOpenDelete()
     }
+    console.log(data);
+
+
 
     return (
         <DefaultLayout>
