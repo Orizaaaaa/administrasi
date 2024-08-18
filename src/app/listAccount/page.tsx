@@ -13,7 +13,8 @@ import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 import useSWR, { mutate } from 'swr'
 import { url } from '@/api/auth'
 import { fetcher } from '@/api/fetcher'
-import { deleteAcount, updateAccount } from '@/api/acount'
+import { createAccount, deleteAcount, updateAccount } from '@/api/acount'
+import { changeTypeAccount } from '@/utils/helper'
 
 
 
@@ -49,22 +50,24 @@ const ListAccount = () => {
     }
 
     const handleDropdownSelection = (selectedValue: number, option: string) => {
+        console.log('haii', selectedValue);
+
         if (option === 'formUpdate') {
             setFormUpdate((prevForm) => ({
                 ...prevForm,
-                account_type: selectedValue,
+                account_type: Number(selectedValue),
             }))
         } else {
             setForm((prevForm) => ({
                 ...prevForm,
-                account_type: selectedValue,
+                account_type: Number(selectedValue),
             }));
         }
 
     };
 
     const dataDropdown = [
-        { label: "Aset", value: 1, description: "Aset" },
+        { label: "Aset", value: 1, },
         { label: "Kewajiban", value: 2, },
         { label: "Ekuitas", value: 3 },
         { label: "Pendapatan", value: 4 },
@@ -85,6 +88,18 @@ const ListAccount = () => {
         onOpenDelete()
     }
 
+    const handleCreate = async (e: any) => {
+        e.preventDefault()
+        await createAccount(form, () => {
+            setForm({
+                name: '',
+                account_code: '',
+                account_type: 0,
+            })
+            mutate(`${url}/account/list`);
+        })
+    }
+
     const handleDelete = async () => {
         await deleteAcount(deletedId, () => {
             onCloseDelete()
@@ -103,10 +118,6 @@ const ListAccount = () => {
             onClose()
         })
     }
-
-    console.log(data);
-
-
 
 
     return (
@@ -133,7 +144,7 @@ const ListAccount = () => {
                     </div>
 
                     <div className="flex justify-end">
-                        <ButtonPrimary className="py-2 px-4 rounded-md font-medium " onClick={() => console.log(form)} >Selesai</ButtonPrimary>
+                        <ButtonPrimary typeButon={'submit'} className="py-2 px-4 rounded-md font-medium " onClick={handleCreate} >Selesai</ButtonPrimary>
                     </div>
                 </form>
             </Card>
@@ -149,7 +160,7 @@ const ListAccount = () => {
                         <TableRow key={index}>
                             <TableCell>{item.name}</TableCell>
                             <TableCell>{item.account_code}</TableCell>
-                            <TableCell>{item.account_type}</TableCell>
+                            <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                             <TableCell>
                                 <div className="flex w-full justify-start gap-2 items-center">
                                     <button onClick={() => modalUpdateOpen(item)} ><FaPenToSquare size={20} /></button>
@@ -184,7 +195,7 @@ const ListAccount = () => {
                         </Autocomplete>
                     </div>
                     <div className="flex justify-end">
-                        <ButtonPrimary className="py-2 px-4 rounded-md font-medium " onClick={handleUpdate} >Selesai</ButtonPrimary>
+                        <ButtonPrimary className="py-2 px-4 rounded-md font-medium" onClick={handleUpdate} >Selesai</ButtonPrimary>
                     </div>
                 </div>
             </ModalDefault>

@@ -17,3 +17,12 @@ export const updateAccount = async (id: string, form: any, callback: any) => {
             console.log(err);
         });
 }
+
+export const createAccount = async (form: any, callback: any) => {
+    await axiosInterceptor.post(`/account`, form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            console.log(err);
+        });
+}

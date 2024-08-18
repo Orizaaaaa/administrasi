@@ -2,15 +2,15 @@ import React from 'react'
 
 type Props = {
     children?: React.ReactNode
-    onClick?: () => void
+    onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
     className?: string
-    type?: 'string'
+    typeButon?: any
     disabled?: boolean
 }
 
-const ButtonPrimary = ({ children, onClick, className, disabled }: Props) => {
+const ButtonPrimary = ({ children, onClick, className, disabled, typeButon = 'button' }: Props) => {
     return (
-        <button disabled={disabled} className={`bg-primary  text-white  ${className}`} onClick={onClick}  >
+        <button type={typeButon} disabled={disabled} className={`bg-primary  text-white  ${className}`} onClick={onClick}  >
             {children}
         </button >
     )
