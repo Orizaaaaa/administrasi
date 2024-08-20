@@ -12,17 +12,17 @@ export const deleteAcount = async (id: string, callback: any) => {
 export const updateAccount = async (id: string, form: any, callback: any) => {
     await axiosInterceptor.put(`/account/${id}`, form)
         .then((result) => {
-            callback(result.data)
+            callback(true, result.data)
         }).catch((err) => {
-            console.log(err);
+            callback(false, err);
         });
 }
 
 export const createAccount = async (form: any, callback: any) => {
     await axiosInterceptor.post(`/account`, form)
         .then((result) => {
-            callback(result.data)
+            callback(true, result.data)
         }).catch((err) => {
-            console.log(err);
+            callback(false, err);
         });
 }

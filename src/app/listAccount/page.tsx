@@ -24,6 +24,10 @@ const ListAccount = () => {
         keepPreviousData: true,
     });
     const [deletedId, setDeletedId] = useState('')
+    const [errorMsg, setErrorMsg] = useState({
+        errorCreate: '',
+        errorUpdate: ''
+    })
     const [updatedId, setUpdatedId] = useState('')
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
@@ -90,14 +94,40 @@ const ListAccount = () => {
 
     const handleCreate = async (e: any) => {
         e.preventDefault()
-        await createAccount(form, () => {
-            setForm({
-                name: '',
-                account_code: '',
-                account_type: 0,
+        if (form.name === '' || form.account_code === '' || form.account_type === 0) {
+            setErrorMsg({
+                errorCreate: 'Tolong isi form  dengan benar',
+                errorUpdate: ''
             })
-            mutate(`${url}/account/list`);
-        })
+        } else {
+            await createAccount(form, (status: boolean, result: any) => {
+                if (status) {
+                    setForm({
+                        name: '',
+                        account_code: '',
+                        account_type: 0,
+                    })
+                    mutate(`${url}/account/list`);
+                    setErrorMsg({
+                        errorUpdate: '',
+                        errorCreate: ''
+                    })
+                } else {
+                    if (result.response.data.message.includes('duplicate key')) {
+                        setErrorMsg({
+                            errorCreate: 'Nomor akun tidak boleh sama',
+                            errorUpdate: ''
+                        })
+                    } else {
+                        setErrorMsg({
+                            errorCreate: 'Tolong isi form  dengan benar',
+                            errorUpdate: ''
+                        })
+                    }
+                }
+            })
+        }
+
     }
 
     const handleDelete = async () => {
@@ -108,14 +138,33 @@ const ListAccount = () => {
     }
 
     const handleUpdate = async () => {
-        await updateAccount(updatedId, formUpdate, () => {
-            setFormUpdate({
-                name: '',
-                account_code: '',
-                account_type: 0,
-            })
-            mutate(`${url}/account/list`);
-            onClose()
+        await updateAccount(updatedId, formUpdate, (status: boolean, result: any) => {
+            if (status) {
+                setFormUpdate({
+                    name: '',
+                    account_code: '',
+                    account_type: 0,
+                })
+                mutate(`${url}/account/list`);
+                onClose()
+                setErrorMsg({
+                    errorUpdate: '',
+                    errorCreate: ''
+                })
+            } else {
+                if (result.response.data.message.includes('duplicate key')) {
+                    setErrorMsg({
+                        errorUpdate: 'Nomor akun tidak boleh sama',
+                        errorCreate: ''
+                    })
+                } else {
+                    setErrorMsg({
+                        errorUpdate: 'Tolong isi form  dengan benar',
+                        errorCreate: ''
+                    })
+                }
+            }
+
         })
     }
 
@@ -142,6 +191,8 @@ const ListAccount = () => {
                             {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
                         </Autocomplete>
                     </div>
+
+                    <p className='my-4 text-red text-small' > <i>{errorMsg.errorCreate}</i> </p>
 
                     <div className="flex justify-end">
                         <ButtonPrimary typeButon={'submit'} className="py-2 px-4 rounded-md font-medium " onClick={handleCreate} >Selesai</ButtonPrimary>
@@ -194,6 +245,7 @@ const ListAccount = () => {
                             {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
                         </Autocomplete>
                     </div>
+                    <p className='my-4 text-red text-small' > <i>{errorMsg.errorUpdate}</i> </p>
                     <div className="flex justify-end">
                         <ButtonPrimary className="py-2 px-4 rounded-md font-medium" onClick={handleUpdate} >Selesai</ButtonPrimary>
                     </div>
