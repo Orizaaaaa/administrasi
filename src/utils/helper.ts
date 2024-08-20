@@ -1,12 +1,11 @@
 
-export function formatDate(isoDateString: string): string {
-    const date = new Date(isoDateString);
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // UTCMonth is zero-based
-    const year = date.getUTCFullYear();
+export const formatDate = (tanggal: any) => {
+    const tahun = tanggal.getFullYear();
+    const bulan = String(tanggal.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0, jadi tambahkan 1
+    const hari = String(tanggal.getDate()).padStart(2, '0');
 
-    return `${day}-${month}-${year}`;
-}
+    return `${tahun}-${bulan}-${hari}`;
+};
 
 export function formatCatrgory(text: string, maxLength: number = 34): string {
     if (text.length > maxLength) {

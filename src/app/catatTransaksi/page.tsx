@@ -12,6 +12,9 @@ import { IoClose } from 'react-icons/io5'
 import { url } from '@/api/auth'
 import { fetcher } from '@/api/fetcher'
 import useSWR from 'swr'
+import { getLocalTimeZone, parseDate } from '@internationalized/date'
+import { useDateFormatter } from "@react-aria/i18n";
+import { formatDate } from '@/utils/helper'
 
 
 interface DropdownItem {
@@ -28,16 +31,9 @@ interface Calendar {
     identifier: string;
 }
 
-interface CalendarData {
-    calendar: Calendar;
-    era: string;
-    year: number;
-    month: number;
-    day: number;
-}
-
 
 const CatatTransaksi = () => {
+    const dateNow = new Date();
     const { data, error } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });
@@ -47,7 +43,7 @@ const CatatTransaksi = () => {
     const [form, setForm] = useState({
         name: '',
         bukti: null as File | null,
-        journal_date: null,
+        journal_date: (parseDate((formatDate(dateNow)))),
         detail: [
             {
                 akun: '',
@@ -56,6 +52,10 @@ const CatatTransaksi = () => {
             },
         ],
     });
+
+    let formatter = useDateFormatter({ dateStyle: "short" });
+    const dataDate = form.journal_date ? formatter.format(form.journal_date.toDate('UTC')) : '';
+    console.log(dataDate);
 
 
     //perhitungan balance
@@ -154,9 +154,10 @@ const CatatTransaksi = () => {
         console.log('Form submitted', form);
     };
 
+
+
+
     console.log(form);
-
-
 
 
     return (
@@ -164,14 +165,15 @@ const CatatTransaksi = () => {
             <Card>
                 <h1 className='text-xl font-medium' >Pencatatan Transaksi</h1>
                 <p className='text-slate-500 text-small' >Pencatatan transaksi disini akan masuk dan di catat ke dalam jurnal umum</p>
-
                 <form action="" className='mt-5' onSubmit={handleSubmit}>
                     <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={(e: any) => setForm({ ...form, name: e.target.value })}
                         value={form.name} />
+                    <p className="text-default-500 text-sm">
+                        Selected date: {form.journal_date ? formatter.format(form.journal_date.toDate(getLocalTimeZone())) : "--"}
+                    </p>
                     <div className="mt-4 space-y-2">
                         <h2>Tanggal</h2>
                         <DatePicker
-
                             size='sm'
                             onChange={(e: any) => setForm({ ...form, journal_date: e })} value={form.journal_date}
                             aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
