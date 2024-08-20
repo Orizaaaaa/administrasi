@@ -24,10 +24,6 @@ const ListAccount = () => {
         keepPreviousData: true,
     });
     const [deletedId, setDeletedId] = useState('')
-    const [errorMsg, setErrorMsg] = useState({
-        errorCreate: '',
-        errorUpdate: ''
-    })
     const [updatedId, setUpdatedId] = useState('')
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
@@ -36,12 +32,23 @@ const ListAccount = () => {
         account_code: '',
         account_type: 0,
     })
-
+    const [errorMsg, setErrorMsg] = useState({
+        errorCreate: '',
+        errorUpdate: ''
+    })
     const [form, setForm] = useState({
         name: '',
         account_code: '',
         account_type: 0,
     })
+
+    const dataDropdown = [
+        { label: "Aset", value: 1, },
+        { label: "Kewajiban", value: 2, },
+        { label: "Ekuitas", value: 3 },
+        { label: "Pendapatan", value: 4 },
+        { label: "Beban", value: 5 },
+    ];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: string) => {
         const { name, value, } = e.target;
@@ -70,17 +77,8 @@ const ListAccount = () => {
 
     };
 
-    const dataDropdown = [
-        { label: "Aset", value: 1, },
-        { label: "Kewajiban", value: 2, },
-        { label: "Ekuitas", value: 3 },
-        { label: "Pendapatan", value: 4 },
-        { label: "Biaya Penjualan", value: 5 },
-        { label: "Pengeluaran", value: 6 },
-        { label: "Pendapatan lain lain", value: 7 },
-        { label: "Biaya lain lain", value: 8 },
-    ];
 
+    //action
     const modalUpdateOpen = (value: any) => {
         setFormUpdate({ ...formUpdate, name: value?.name, account_code: value.account_code, account_type: value.account_type })
         setUpdatedId(value._id)
