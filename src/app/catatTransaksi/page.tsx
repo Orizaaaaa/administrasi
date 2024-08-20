@@ -33,17 +33,24 @@ interface Calendar {
 
 
 const CatatTransaksi = () => {
-    const dateNow = new Date();
+
     const { data, error } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });
+
+    //formater date
+    const dateNow = new Date();
+    const [selectedDate, setSelectedDate] = useState(parseDate((formatDate(dateNow))))
+    let formatter = useDateFormatter({ dateStyle: "short" });
+    const dataDate = selectedDate ? formatter.format(selectedDate.toDate('UTC')) : '';
+
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalKredit, setTotalKredit] = useState(0);
     const [isBalanced, setIsBalanced] = useState(true);
     const [form, setForm] = useState({
         name: '',
         bukti: null as File | null,
-        journal_date: (parseDate((formatDate(dateNow)))),
+        journal_date: dataDate,
         detail: [
             {
                 akun: '',
@@ -52,10 +59,6 @@ const CatatTransaksi = () => {
             },
         ],
     });
-
-    let formatter = useDateFormatter({ dateStyle: "short" });
-    const dataDate = form.journal_date ? formatter.format(form.journal_date.toDate('UTC')) : '';
-    console.log(dataDate);
 
 
     //perhitungan balance
@@ -168,14 +171,11 @@ const CatatTransaksi = () => {
                 <form action="" className='mt-5' onSubmit={handleSubmit}>
                     <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={(e: any) => setForm({ ...form, name: e.target.value })}
                         value={form.name} />
-                    <p className="text-default-500 text-sm">
-                        Selected date: {form.journal_date ? formatter.format(form.journal_date.toDate(getLocalTimeZone())) : "--"}
-                    </p>
                     <div className="mt-4 space-y-2">
                         <h2>Tanggal</h2>
                         <DatePicker
                             size='sm'
-                            onChange={(e: any) => setForm({ ...form, journal_date: e })} value={form.journal_date}
+                            onChange={(e: any) => setSelectedDate(e)} value={selectedDate}
                             aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                     </div>
 
