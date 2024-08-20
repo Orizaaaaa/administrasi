@@ -19,6 +19,9 @@ interface DateData {
 }
 
 const CatatTransaksi = () => {
+    const [totalDebit, setTotalDebit] = useState(0);
+    const [totalKredit, setTotalKredit] = useState(0);
+    const [isBalanced, setIsBalanced] = useState(true);
     const [form, setForm] = useState({
         name: '',
         bukti: null as File | null,
@@ -32,10 +35,8 @@ const CatatTransaksi = () => {
         ],
     });
 
-    const [totalDebit, setTotalDebit] = useState(0);
-    const [totalKredit, setTotalKredit] = useState(0);
-    const [isBalanced, setIsBalanced] = useState(true);
 
+    //perhitungan balance
     useEffect(() => {
         const debit = form.detail.reduce((sum, trans) => sum + parseFloat(trans.debit || '0'), 0);
         const kredit = form.detail.reduce((sum, trans) => sum + parseFloat(trans.credit || '0'), 0);
@@ -45,6 +46,8 @@ const CatatTransaksi = () => {
         setIsBalanced(debit === kredit);
     }, [form.detail]);
 
+
+    //perubahan kata
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target;
         const updatedTransaksi = form.detail.map((trans, i) =>
@@ -53,6 +56,8 @@ const CatatTransaksi = () => {
         setForm({ ...form, detail: updatedTransaksi });
     };
 
+
+    //tambah kolom transaksi
     const addMoreTransaction = () => {
         setForm((prevForm) => ({
             ...prevForm,
@@ -63,11 +68,14 @@ const CatatTransaksi = () => {
         }));
     };
 
+
+    //hapus kolom transaksi
     const handleRemoveTransaction = (index: number) => {
         const updatedTransaksi = form.detail.filter((_, i) => i !== index);
         setForm({ ...form, detail: updatedTransaksi });
     };
 
+    //data dropdown
     const handleDropdownSelection = (selectedValue: string, index: number) => {
         const updatedTransaksi = form.detail.map((trans, i) =>
             i === index ? { ...trans, akun: selectedValue } : trans
@@ -86,6 +94,8 @@ const CatatTransaksi = () => {
         { label: "Biaya Lain-lain", value: "8" },
     ];
 
+
+    // handle image
     const handleFileManager = (fileName: string) => {
         if (fileName === 'add') {
             const fileInput = document.getElementById("image-input-add") as HTMLInputElement | null;
