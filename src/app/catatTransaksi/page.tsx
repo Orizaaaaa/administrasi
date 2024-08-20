@@ -201,7 +201,7 @@ const CatatTransaksi = () => {
                             <div className="images border-dashed border-2 border-black rounded-md h-[200px] bg-gray-300">
                                 <button className="flex-col justify-center items-center h-full w-full " type="button" onClick={() => handleFileManager('add')} >
                                     <Image className="w-20 h-20 mx-auto" src={camera} alt='cam' />
-                                    <p>*Masukan logo dari kategori tersebut</p>
+                                    <p>*Masukan bukti dari transaksi tersebut</p>
                                 </button>
                             </div>
                         )}
