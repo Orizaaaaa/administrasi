@@ -7,12 +7,12 @@ import React, { useEffect, useState } from 'react'
 import { camera } from '../image'
 import Image from 'next/image'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
-import { AiOutlineDelete, AiOutlinePlusCircle } from 'react-icons/ai'
+import { AiOutlinePlusCircle } from 'react-icons/ai'
 import { IoClose } from 'react-icons/io5'
 import { url } from '@/api/auth'
 import { fetcher } from '@/api/fetcher'
 import useSWR from 'swr'
-import { getLocalTimeZone, parseDate } from '@internationalized/date'
+import { parseDate } from '@internationalized/date'
 import { useDateFormatter } from "@react-aria/i18n";
 import { formatDate } from '@/utils/helper'
 
@@ -45,6 +45,7 @@ const CatatTransaksi = () => {
     const dataDate = selectedDate ? formatter.format(selectedDate.toDate('UTC')) : '';
 
     const [totalDebit, setTotalDebit] = useState(0);
+    const [errorMsg, setErrorMsg] = useState('')
     const [totalKredit, setTotalKredit] = useState(0);
     const [isBalanced, setIsBalanced] = useState(true);
     const [form, setForm] = useState({
@@ -147,14 +148,16 @@ const CatatTransaksi = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
+        const allZero = form.detail.every(trans => parseFloat(trans.debit || '0') === 0 && parseFloat(trans.credit || '0') === 0);
         if (!isBalanced) {
-            alert('Debit dan kredit harus balance.');
-            return;
+            setErrorMsg('Transaksi tidak balance');
+        } else if (allZero) {
+            setErrorMsg('Transaksi tidak dapat diproses karena debit dan kredit semuanya 0');
+        } else if (form.name === '', form.bukti === null) {
+            setErrorMsg('Nama Transaksi dan bukti tidak boleh kosong');
+        } else {
+            setErrorMsg('')
         }
-
-        // Lanjutkan submit data jika balance
-        console.log('Form submitted', form);
     };
 
 
@@ -251,7 +254,7 @@ const CatatTransaksi = () => {
                             <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.bukti === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
                         </div>
                     </div>
-
+                    <p className='my-2 text-red' > <i>{errorMsg}</i> </p>
                     <div className="flex justify-end">
                         <ButtonPrimary typeButon={'submit'} className="py-2 px-4 rounded-md font-medium "  >Selesai</ButtonPrimary>
                     </div>
