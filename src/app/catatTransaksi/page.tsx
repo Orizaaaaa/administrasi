@@ -28,7 +28,7 @@ const CatatTransaksi = () => {
         tanggal: null,
         detail: [
             {
-                akun: '',
+                akun: '' as string | number,
                 debit: '',
                 credit: '',
             },
@@ -78,20 +78,17 @@ const CatatTransaksi = () => {
     //data dropdown
     const handleDropdownSelection = (selectedValue: string, index: number) => {
         const updatedTransaksi = form.detail.map((trans, i) =>
-            i === index ? { ...trans, akun: selectedValue } : trans
+            i === index ? { ...trans, akun: Number(selectedValue) } : trans
         );
         setForm({ ...form, detail: updatedTransaksi });
     };
 
     const dataDropdown = [
-        { label: "Aset", value: "1", },
-        { label: "Kewajiban", value: "2", },
-        { label: "Ekuitas", value: "3" },
-        { label: "Pendapatan", value: "4" },
-        { label: "Biaya Penjualan", value: "5" },
-        { label: "Pengeluaran", value: "6" },
-        { label: "Pendapatan Lain-lain", value: "7" },
-        { label: "Biaya Lain-lain", value: "8" },
+        { label: "Aset", value: 1, },
+        { label: "Kewajiban", value: 2, },
+        { label: "Ekuitas", value: 3 },
+        { label: "Pendapatan", value: 4 },
+        { label: "Beban", value: 5 },
     ];
 
 
