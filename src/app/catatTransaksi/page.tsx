@@ -9,26 +9,48 @@ import Image from 'next/image'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import { AiOutlineDelete, AiOutlinePlusCircle } from 'react-icons/ai'
 import { IoClose } from 'react-icons/io5'
+import { url } from '@/api/auth'
+import { fetcher } from '@/api/fetcher'
+import useSWR from 'swr'
 
-interface DateData {
-    calendar: string;
+
+interface DropdownItem {
+    label: string;
+    value: string;
+}
+
+interface ItemData {
+    _id: string;
+    name: string;
+}
+
+interface Calendar {
+    identifier: string;
+}
+
+interface CalendarData {
+    calendar: Calendar;
     era: string;
     year: number;
     month: number;
     day: number;
 }
 
+
 const CatatTransaksi = () => {
+    const { data, error } = useSWR(`${url}/account/list`, fetcher, {
+        keepPreviousData: true,
+    });
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalKredit, setTotalKredit] = useState(0);
     const [isBalanced, setIsBalanced] = useState(true);
     const [form, setForm] = useState({
         name: '',
         bukti: null as File | null,
-        tanggal: null,
+        journal_date: null,
         detail: [
             {
-                akun: '' as string | number,
+                akun: '',
                 debit: '',
                 credit: '',
             },
@@ -47,11 +69,21 @@ const CatatTransaksi = () => {
     }, [form.detail]);
 
 
-    //perubahan kata
+    //perubahan kata (kalo string gabisa)
+    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    //     const { name, value } = e.target;
+    //     const updatedTransaksi = form.detail.map((trans, i) =>
+    //         i === index ? { ...trans, [name]: value } : trans
+    //     );
+    //     setForm({ ...form, detail: updatedTransaksi });
+    // };
+
+
+    //kalo bisa string
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target;
         const updatedTransaksi = form.detail.map((trans, i) =>
-            i === index ? { ...trans, [name]: value } : trans
+            i === index ? { ...trans, [name]: (name === 'debit' || name === 'credit') ? Number(value) : value } : trans
         );
         setForm({ ...form, detail: updatedTransaksi });
     };
@@ -75,21 +107,20 @@ const CatatTransaksi = () => {
         setForm({ ...form, detail: updatedTransaksi });
     };
 
+
     //data dropdown
     const handleDropdownSelection = (selectedValue: string, index: number) => {
         const updatedTransaksi = form.detail.map((trans, i) =>
-            i === index ? { ...trans, akun: Number(selectedValue) } : trans
+            i === index ? { ...trans, akun: selectedValue } : trans
         );
         setForm({ ...form, detail: updatedTransaksi });
     };
 
-    const dataDropdown = [
-        { label: "Aset", value: 1, },
-        { label: "Kewajiban", value: 2, },
-        { label: "Ekuitas", value: 3 },
-        { label: "Pendapatan", value: 4 },
-        { label: "Beban", value: 5 },
-    ];
+    const dataDropdown: DropdownItem[] = (data?.data || []).map((item: ItemData) => ({
+        label: item.name,
+        value: item._id
+    }));
+
 
 
     // handle image
@@ -126,6 +157,8 @@ const CatatTransaksi = () => {
     console.log(form);
 
 
+
+
     return (
         <DefaultLayout>
             <Card>
@@ -137,7 +170,11 @@ const CatatTransaksi = () => {
                         value={form.name} />
                     <div className="mt-4 space-y-2">
                         <h2>Tanggal</h2>
-                        <DatePicker size='sm' onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
+                        <DatePicker
+
+                            size='sm'
+                            onChange={(e: any) => setForm({ ...form, journal_date: e })} value={form.journal_date}
+                            aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                     </div>
 
                     {form.detail.map((trans, index) => (
