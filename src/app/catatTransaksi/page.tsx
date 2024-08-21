@@ -151,7 +151,21 @@ const CatatTransaksi = () => {
 
                 createTransaction(data, (result: any) => {
                     console.log('hasil', result);
-                    // Reset form after successful submission
+                    setForm({
+                        name: '',
+                        image: null as File | null,
+                        journal_date: dataDate,
+                        detail: [
+                            {
+                                account: '',
+                                debit: 0, // Updated to number
+                                credit: 0, // Updated to number
+                                note: "This is a note for the journal entry."
+                            },
+                        ],
+                        data_change: false,
+                        note: "This is a note for the journal entry."
+                    })
                 });
                 setErrorMsg('');
             }
