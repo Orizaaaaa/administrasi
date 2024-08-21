@@ -42,7 +42,7 @@ const CatatTransaksi = () => {
     const dateNow = new Date();
     const [selectedDate, setSelectedDate] = useState(parseDate((formatDate(dateNow))))
     const dataDate = selectedDate
-        ? `${selectedDate.month.toString().padStart(2, '0')}/${selectedDate.day.toString().padStart(2, '0')}/${selectedDate.year.toString().slice(-2)}`
+        ? `${selectedDate.month.toString().padStart(2, '0')}/${selectedDate.day.toString().padStart(2, '0')}/${selectedDate.year.toString().padStart(4, '0')}`
         : '';
 
     const [totalDebit, setTotalDebit] = useState(0);
@@ -147,6 +147,8 @@ const CatatTransaksi = () => {
             const imageUrl = await postImage({ image: form.image });
             if (imageUrl) {
                 const data = { ...form, image: imageUrl };
+                console.log('data yang di kirim', data);
+
                 createTransaction(data, (result: any) => {
                     console.log('hasil', result);
                     // Reset form after successful submission
