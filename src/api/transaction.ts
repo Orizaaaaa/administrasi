@@ -11,3 +11,13 @@ export const createTransaction = async (form: any, callback: any) => {
         });
 
 }
+
+export const getJurnalUmum = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get('/journal/list', { params: { startDate: startDate, endDate: endDate } })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+
+}

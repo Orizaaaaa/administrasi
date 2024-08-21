@@ -6,18 +6,30 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragemnts/modal/modal'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Autocomplete, AutocompleteItem, DatePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
 import { camera } from '../image'
+import { getJurnalUmum } from '@/api/transaction'
+import { parseDate } from '@internationalized/date'
+import { formatDate, formatDateStr } from '@/utils/helper'
 
 
 const JurnalUmum = () => {
+    const dateNow = new Date();
+    let [date, setDate] = React.useState({
+        start: parseDate((formatDate(dateNow))),
+        end: parseDate((formatDate(dateNow))),
+    });
+    const startDate = formatDateStr(date.start);
+    const endDate = formatDateStr(date.end);
+    console.log(startDate, endDate);
+
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
-    const [date, setDate] = useState(null);
     const [form, setForm] = useState({
         nama_transaksi: '',
         debit: '',
@@ -84,6 +96,15 @@ const JurnalUmum = () => {
         }
     };
 
+    console.log(form);
+
+
+    useEffect(() => {
+        getJurnalUmum(startDate, endDate, (result: any) => {
+            console.log('Data received:', result);
+        });
+    }, []);
+
 
     return (
         <DefaultLayout>
@@ -96,7 +117,11 @@ const JurnalUmum = () => {
                 </div>
                 <div className="flex justify-end gap-2">
                     <ButtonSecondary className=' px-4 rounded-md'>Download dalam bentuk Excel</ButtonSecondary>
-                    <DatePicker size='sm' onChange={(e: any) => setDate(e)} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
+                    <DateRangePicker
+                        visibleMonths={2}
+                        size='sm' onChange={setDate} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg"
+                    />
+
                 </div>
 
             </Card>

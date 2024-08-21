@@ -55,3 +55,7 @@ export function formatRupiah(amount: number | undefined): string {
 export function capitalizeWords(str: string): string {
     return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 }
+
+
+export const formatDateStr = (dateObj?: { month: number, day: number, year: number }) =>
+    dateObj ? `${dateObj.month.toString().padStart(2, '0')}/${dateObj.day.toString().padStart(2, '0')}/${dateObj.year.toString().padStart(4, '0')}` : '';
