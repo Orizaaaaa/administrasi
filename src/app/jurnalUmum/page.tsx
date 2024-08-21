@@ -16,6 +16,35 @@ import { getJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
 import { formatDate, formatDateStr } from '@/utils/helper'
 
+interface Account {
+    _id: string;
+    name: string;
+    account_code: number;
+    account_type: number;
+    createdAt: string;
+}
+
+interface Detail {
+    _id: string;
+    account: Account;
+    credit: number;
+    debit: number;
+    note: string;
+}
+
+interface DataItem {
+    _id: string;
+    createdAt: string;
+    data_change: boolean;
+    detail: Detail[];
+    image: string;
+    journal_date: string;
+    name: string;
+    note: string;
+    updatedAt: string;
+    __v: number;
+}
+
 
 const JurnalUmum = () => {
     const dateNow = new Date();
@@ -23,6 +52,7 @@ const JurnalUmum = () => {
         start: parseDate((formatDate(dateNow))),
         end: parseDate((formatDate(dateNow))),
     });
+    const [data, setData] = useState([])
     const startDate = formatDateStr(date.start);
     const endDate = formatDateStr(date.end);
     console.log(startDate, endDate);
@@ -101,9 +131,10 @@ const JurnalUmum = () => {
 
     useEffect(() => {
         getJurnalUmum(startDate, endDate, (result: any) => {
-            console.log('Data received:', result);
+            setData(result.data)
         });
-    }, []);
+    }, [startDate, endDate]);
+    console.log(data);
 
 
     return (
@@ -126,9 +157,9 @@ const JurnalUmum = () => {
 
             </Card>
             <Table className='mt-7 border-hidden' aria-label="Example static collection table">
-                <TableHeader  >
+                <TableHeader>
                     <TableColumn>TANGGAL</TableColumn>
-                    <TableColumn>KETERANGAN AKUN </TableColumn>
+                    <TableColumn>KETERANGAN AKUN</TableColumn>
                     <TableColumn>KETERANGAN TRANSAKSI</TableColumn>
                     <TableColumn>REF</TableColumn>
                     <TableColumn>DEBIT</TableColumn>
@@ -136,56 +167,28 @@ const JurnalUmum = () => {
                     <TableColumn>ACTION</TableColumn>
                 </TableHeader>
                 <TableBody>
-                    <TableRow key="1">
-                        <TableCell>01/01/2024</TableCell>
-                        <TableCell>Kas</TableCell>
-                        <TableCell>Pendapatan gaji</TableCell>
-                        <TableCell>101</TableCell>
-                        <TableCell>500.000.000</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell>
-                            <div className="flex w-full justify-start gap-2 items-center">
-                                <button onClick={modalOpen}><FaPenToSquare size={20} /></button>
-                                <button onClick={modalDeleteOpen} ><MdOutlineDelete size={24} color='red' /></button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow key="2">
-                        <TableCell>{''}</TableCell>
-                        <TableCell>Modal</TableCell>
-                        <TableCell>Pendapatan gaji</TableCell>
-                        <TableCell>301</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell>500.000.000</TableCell>
-                        <TableCell>
-                            {''}
-                        </TableCell>
-                    </TableRow>
-                    <TableRow key="3">
-                        <TableCell>01/01/2024</TableCell>
-                        <TableCell>Kas</TableCell>
-                        <TableCell>Pendapatan gaji</TableCell>
-                        <TableCell>101</TableCell>
-                        <TableCell>500.000.000</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell>
-                            <div className="flex w-full justify-start gap-2 items-center">
-                                <button onClick={modalOpen} ><FaPenToSquare size={20} /></button>
-                                <button onClick={modalDeleteOpen} ><MdOutlineDelete size={24} color='red' /></button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow key="4">
-                        <TableCell>{''}</TableCell>
-                        <TableCell>Modal</TableCell>
-                        <TableCell>Pendapatan gaji</TableCell>
-                        <TableCell>301</TableCell>
-                        <TableCell>{''}</TableCell>
-                        <TableCell>500.000.000</TableCell>
-                        <TableCell>
-                            {''}
-                        </TableCell>
-                    </TableRow>
+                    {data.map((item: any) =>
+                        item.detail.map((detail: any) => (
+                            <TableRow key={detail._id}>
+                                <TableCell>{new Date(item.journal_date).toLocaleDateString()}</TableCell>
+                                <TableCell>{detail.account.name}</TableCell>
+                                <TableCell>{item.name}</TableCell>
+                                <TableCell>{detail.account.account_code}</TableCell>
+                                <TableCell>{detail.debit.toLocaleString()}</TableCell>
+                                <TableCell>{detail.credit.toLocaleString()}</TableCell>
+                                <TableCell>
+                                    <div className="flex w-full justify-start gap-2 items-center">
+                                        <button >
+                                            <FaPenToSquare size={20} />
+                                        </button>
+                                        <button >
+                                            <MdOutlineDelete size={24} color='red' />
+                                        </button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
 
