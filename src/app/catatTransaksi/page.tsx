@@ -15,6 +15,8 @@ import useSWR from 'swr'
 import { parseDate } from '@internationalized/date'
 import { useDateFormatter } from "@react-aria/i18n";
 import { formatDate } from '@/utils/helper'
+import { createTransaction } from '@/api/transaction'
+import { postImage } from '@/api/imagePost'
 
 
 interface DropdownItem {
@@ -50,15 +52,17 @@ const CatatTransaksi = () => {
     const [isBalanced, setIsBalanced] = useState(true);
     const [form, setForm] = useState({
         name: '',
-        bukti: null as File | null,
+        image: null as File | null,
         journal_date: dataDate,
         detail: [
             {
-                akun: '',
+                account: '',
                 debit: '',
                 credit: '',
             },
         ],
+        data_change: false,
+        note: "This is a note for the journal entry."
     });
 
 
@@ -99,7 +103,7 @@ const CatatTransaksi = () => {
             ...prevForm,
             detail: [
                 ...prevForm.detail,
-                { akun: '', debit: '', credit: '' },
+                { account: '', debit: '', credit: '' },
             ],
         }));
     };
@@ -115,7 +119,7 @@ const CatatTransaksi = () => {
     //data dropdown
     const handleDropdownSelection = (selectedValue: string, index: number) => {
         const updatedTransaksi = form.detail.map((trans, i) =>
-            i === index ? { ...trans, akun: selectedValue } : trans
+            i === index ? { ...trans, account: selectedValue } : trans
         );
         setForm({ ...form, detail: updatedTransaksi });
     };
@@ -140,22 +144,43 @@ const CatatTransaksi = () => {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, InputSelect: string) => {
         if (InputSelect === 'add') {
             const selectedImage = e.target.files?.[0];
-            setForm({ ...form, bukti: selectedImage || null });
+            setForm({ ...form, image: selectedImage || null });
         } else {
             console.log('error');
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        postImage
+
         const allZero = form.detail.every(trans => parseFloat(trans.debit || '0') === 0 && parseFloat(trans.credit || '0') === 0);
         if (!isBalanced) {
             setErrorMsg('Transaksi tidak balance');
         } else if (allZero) {
             setErrorMsg('Transaksi tidak dapat diproses karena debit dan kredit semuanya 0');
-        } else if (form.name === '', form.bukti === null) {
+        } else if (form.name === '', form.image === null) {
             setErrorMsg('Nama Transaksi dan bukti tidak boleh kosong');
         } else {
+            const imageUrl = await postImage({ image: form.image });
+            const data = { ...form, image: imageUrl }
+            createTransaction(data, (result: any) => {
+                console.log(result);
+            })
+            setForm({
+                name: '',
+                image: null as File | null,
+                journal_date: dataDate,
+                detail: [
+                    {
+                        account: '',
+                        debit: '',
+                        credit: '',
+                    },
+                ],
+                data_change: false,
+                note: "This is a note for the journal entry."
+            })
             setErrorMsg('')
         }
     };
@@ -234,8 +259,8 @@ const CatatTransaksi = () => {
                     </div>
 
                     <div className="images">
-                        {form.bukti && form.bukti instanceof Blob ? (
-                            <img className="h-[170px] md:h-[300px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.bukti)} />
+                        {form.image && form.image instanceof Blob ? (
+                            <img className="h-[170px] md:h-[300px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.image)} />
                         ) : (
                             <div className="images border-dashed border-2 border-black rounded-md h-[200px] bg-gray-300">
                                 <button className="flex-col justify-center items-center h-full w-full " type="button" onClick={() => handleFileManager('add')} >
@@ -251,7 +276,7 @@ const CatatTransaksi = () => {
                             onChange={(e) => handleImageChange(e, 'add')}
                         />
                         <div className="flex justify-center gap-3 mt-3">
-                            <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.bukti === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
+                            <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.image === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
                         </div>
                     </div>
                     <p className='my-2 text-red' > <i>{errorMsg}</i> </p>
