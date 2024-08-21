@@ -18,7 +18,6 @@ import { formatDate } from '@/utils/helper'
 import { createTransaction } from '@/api/transaction'
 import { postImage } from '@/api/imagePost'
 
-
 interface DropdownItem {
     label: string;
     value: string;
@@ -33,18 +32,18 @@ interface Calendar {
     identifier: string;
 }
 
-
 const CatatTransaksi = () => {
 
-    const { data, error } = useSWR(`${url}/account/list`, fetcher, {
+    const { data } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });
 
-    //formater date
+    // Formater date
     const dateNow = new Date();
     const [selectedDate, setSelectedDate] = useState(parseDate((formatDate(dateNow))))
-    let formatter = useDateFormatter({ dateStyle: "short" });
-    const dataDate = selectedDate ? formatter.format(selectedDate.toDate('UTC')) : '';
+    const dataDate = selectedDate
+        ? `${selectedDate.month.toString().padStart(2, '0')}/${selectedDate.day.toString().padStart(2, '0')}/${selectedDate.year.toString().slice(-2)}`
+        : '';
 
     const [totalDebit, setTotalDebit] = useState(0);
     const [errorMsg, setErrorMsg] = useState('')
@@ -57,66 +56,52 @@ const CatatTransaksi = () => {
         detail: [
             {
                 account: '',
-                debit: '',
-                credit: '',
+                debit: 0, // Updated to number
+                credit: 0, // Updated to number
+                note: "This is a note for the journal entry."
             },
         ],
         data_change: false,
         note: "This is a note for the journal entry."
     });
 
-
-    //perhitungan balance
+    // Perhitungan balance
     useEffect(() => {
-        const debit = form.detail.reduce((sum, trans) => sum + parseFloat(trans.debit || '0'), 0);
-        const kredit = form.detail.reduce((sum, trans) => sum + parseFloat(trans.credit || '0'), 0);
+        const debit = form.detail.reduce((sum, trans) => sum + (trans.debit || 0), 0);
+        const kredit = form.detail.reduce((sum, trans) => sum + (trans.credit || 0), 0);
 
         setTotalDebit(debit);
         setTotalKredit(kredit);
         setIsBalanced(debit === kredit);
     }, [form.detail]);
 
-
-    //perubahan kata (kalo string gabisa)
-    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    //     const { name, value } = e.target;
-    //     const updatedTransaksi = form.detail.map((trans, i) =>
-    //         i === index ? { ...trans, [name]: value } : trans
-    //     );
-    //     setForm({ ...form, detail: updatedTransaksi });
-    // };
-
-
-    //kalo bisa string
+    // Handle perubahan input
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target;
         const updatedTransaksi = form.detail.map((trans, i) =>
-            i === index ? { ...trans, [name]: (name === 'debit' || name === 'credit') ? Number(value) : value } : trans
+            i === index ? { ...trans, [name]: name === 'debit' || name === 'credit' ? Number(value) : value } : trans
         );
         setForm({ ...form, detail: updatedTransaksi });
     };
 
-
-    //tambah kolom transaksi
+    // Tambah kolom transaksi
     const addMoreTransaction = () => {
         setForm((prevForm) => ({
             ...prevForm,
             detail: [
                 ...prevForm.detail,
-                { account: '', debit: '', credit: '' },
+                { account: '', debit: 0, credit: 0, note: 'This is a note for the journal entry.' },
             ],
         }));
     };
 
-
-    //hapus kolom transaksi
+    // Hapus kolom transaksi
     const handleRemoveTransaction = (index: number) => {
         const updatedTransaksi = form.detail.filter((_, i) => i !== index);
         setForm({ ...form, detail: updatedTransaksi });
     };
 
-
-    //data dropdown
+    // Data dropdown
     const handleDropdownSelection = (selectedValue: string, index: number) => {
         const updatedTransaksi = form.detail.map((trans, i) =>
             i === index ? { ...trans, account: selectedValue } : trans
@@ -129,9 +114,7 @@ const CatatTransaksi = () => {
         value: item._id
     }));
 
-
-
-    // handle image
+    // Handle image
     const handleFileManager = (fileName: string) => {
         if (fileName === 'add') {
             const fileInput = document.getElementById("image-input-add") as HTMLInputElement | null;
@@ -152,58 +135,46 @@ const CatatTransaksi = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        postImage
 
-        const allZero = form.detail.every(trans => parseFloat(trans.debit || '0') === 0 && parseFloat(trans.credit || '0') === 0);
+        const allZero = form.detail.every(trans => trans.debit === 0 && trans.credit === 0);
         if (!isBalanced) {
             setErrorMsg('Transaksi tidak balance');
         } else if (allZero) {
             setErrorMsg('Transaksi tidak dapat diproses karena debit dan kredit semuanya 0');
-        } else if (form.name === '', form.image === null) {
+        } else if (form.name === '' || form.image === null) {
             setErrorMsg('Nama Transaksi dan bukti tidak boleh kosong');
         } else {
             const imageUrl = await postImage({ image: form.image });
-            const data = { ...form, image: imageUrl }
-            createTransaction(data, (result: any) => {
-                console.log(result);
-            })
-            setForm({
-                name: '',
-                image: null as File | null,
-                journal_date: dataDate,
-                detail: [
-                    {
-                        account: '',
-                        debit: '',
-                        credit: '',
-                    },
-                ],
-                data_change: false,
-                note: "This is a note for the journal entry."
-            })
-            setErrorMsg('')
+            if (imageUrl) {
+                const data = { ...form, image: imageUrl };
+                createTransaction(data, (result: any) => {
+                    console.log('hasil', result);
+                    // Reset form after successful submission
+                });
+                setErrorMsg('');
+            }
         }
     };
 
 
-
-
     console.log(form);
-
+    console.log(dataDate);
 
     return (
         <DefaultLayout>
             <Card>
-                <h1 className='text-xl font-medium' >Pencatatan Transaksi</h1>
-                <p className='text-slate-500 text-small' >Pencatatan transaksi disini akan masuk dan di catat ke dalam jurnal umum</p>
-                <form action="" className='mt-5' onSubmit={handleSubmit}>
-                    <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={(e: any) => setForm({ ...form, name: e.target.value })}
+                <h1 className='text-xl font-medium'>Pencatatan Transaksi</h1>
+                <p className='text-slate-500 text-small'>Pencatatan transaksi disini akan masuk dan di catat ke dalam jurnal umum</p>
+                <form className='mt-5' onSubmit={handleSubmit}>
+                    <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text"
+                        onChange={(e: any) => setForm({ ...form, name: e.target.value })}
                         value={form.name} />
+
                     <div className="mt-4 space-y-2">
                         <h2>Tanggal</h2>
                         <DatePicker
                             size='sm'
-                            onChange={(e: any) => setSelectedDate(e)} value={selectedDate}
+                            onChange={(e) => setSelectedDate(e)} value={selectedDate}
                             aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                     </div>
 
@@ -240,7 +211,7 @@ const CatatTransaksi = () => {
                                         onChange={(e: any) => handleChange(e, index)}
                                         value={trans.credit}
                                     />
-                                    <IoClose onClick={() => handleRemoveTransaction(index)} className="cursor-pointer " color='red' />
+                                    <IoClose onClick={() => handleRemoveTransaction(index)} className="cursor-pointer" color='red' />
                                 </div>
                             </div>
                         </div>
