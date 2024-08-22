@@ -178,10 +178,10 @@ const JurnalUmum = () => {
                                 <TableCell>{detail.credit.toLocaleString()}</TableCell>
                                 <TableCell>
                                     <div className="flex w-full justify-start gap-2 items-center">
-                                        <button >
+                                        <button onClick={() => modalOpen()} >
                                             <FaPenToSquare size={20} />
                                         </button>
-                                        <button >
+                                        <button onClick={() => modalDeleteOpen()} >
                                             <MdOutlineDelete size={24} color='red' />
                                         </button>
                                     </div>
