@@ -13,8 +13,7 @@ import { url } from '@/api/auth'
 import { fetcher } from '@/api/fetcher'
 import useSWR from 'swr'
 import { parseDate } from '@internationalized/date'
-import { useDateFormatter } from "@react-aria/i18n";
-import { formatDate } from '@/utils/helper'
+import { formatDate, formatDateStr } from '@/utils/helper'
 import { createTransaction } from '@/api/transaction'
 import { postImage } from '@/api/imagePost'
 
@@ -44,6 +43,17 @@ const CatatTransaksi = () => {
     const dataDate = selectedDate
         ? `${selectedDate.month.toString().padStart(2, '0')}/${selectedDate.day.toString().padStart(2, '0')}/${selectedDate.year.toString().padStart(4, '0')}`
         : '';
+
+
+    // change date
+    const handleDateChange = (date: any | null) => {
+        setSelectedDate(date);
+        setForm((prevForm) => ({
+            ...prevForm,
+            journal_date: formatDateStr(date),
+        }));
+    };
+
 
     const [totalDebit, setTotalDebit] = useState(0);
     const [errorMsg, setErrorMsg] = useState('')
@@ -173,6 +183,9 @@ const CatatTransaksi = () => {
     };
 
 
+
+
+
     console.log(form);
     console.log(dataDate);
 
@@ -190,7 +203,8 @@ const CatatTransaksi = () => {
                         <h2>Tanggal</h2>
                         <DatePicker
                             size='sm'
-                            onChange={(e) => setSelectedDate(e)} value={selectedDate}
+                            onChange={handleDateChange}
+                            value={selectedDate}
                             aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                     </div>
 

@@ -3,7 +3,6 @@ import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import InputForm from '@/components/elements/input/InputForm'
-import ModalDefault from '@/components/fragemnts/modal/modal'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Modal, ModalContent, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
@@ -24,27 +23,6 @@ interface Account {
     createdAt: string;
 }
 
-interface Detail {
-    _id: string;
-    account: Account;
-    credit: number;
-    debit: number;
-    note: string;
-}
-
-interface DataItem {
-    _id: string;
-    createdAt: string;
-    data_change: boolean;
-    detail: Detail[];
-    image: string;
-    journal_date: string;
-    name: string;
-    note: string;
-    updatedAt: string;
-    __v: number;
-}
-
 
 const JurnalUmum = () => {
     const dateNow = new Date();
@@ -52,6 +30,16 @@ const JurnalUmum = () => {
         start: parseDate((formatDate(dateNow))),
         end: parseDate((formatDate(dateNow))),
     });
+
+    const [selectedDate, setSelectedDate] = useState(parseDate((formatDate(dateNow))))
+
+    React.useEffect(() => {
+        setForm((prevForm) => ({
+            ...prevForm,
+            journal_date: formatDateStr(selectedDate),
+        }));
+    }, [selectedDate]);
+
     const [total, setTotal] = useState({
         debit: 0,
         credit: 0
@@ -60,25 +48,28 @@ const JurnalUmum = () => {
     const [data, setData] = useState([])
     const startDate = formatDateStr(date.start);
     const endDate = formatDateStr(date.end);
-    console.log(startDate, endDate);
 
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
     const [form, setForm] = useState({
-        nama_transaksi: '',
+        name: '',
         debit: '',
         kredit: '',
         bukti: null as File | null,
-        tanggal: null,
+        journal_date: formatDateStr(selectedDate),
         nominal: ''
 
     })
-    const modalOpen = (item: any) => {
-        console.log('aku item modal', item);
 
+
+    const modalOpen = (item: any) => {
+        const date = new Date(item.journal_date);
+        setSelectedDate(parseDate(formatDate(date)));
         onOpen()
     }
+
+
     const modalDeleteOpen = () => {
         onOpenDelete()
     }
@@ -133,8 +124,6 @@ const JurnalUmum = () => {
         }
     };
 
-    console.log(form);
-
 
     useEffect(() => {
         setLoadingState("loading");
@@ -154,7 +143,7 @@ const JurnalUmum = () => {
         });
     }, [startDate, endDate]);
 
-
+    console.log(form);
     console.log(data);
     console.log(total);
 
@@ -218,21 +207,20 @@ const JurnalUmum = () => {
                 </TableBody>
             </Table>
 
-            {/* <ModalDefault isOpen={isOpen} onClose={onClose} >
-
-            </ModalDefault> */}
-
 
             <Modal isOpen={isOpen} onClose={onClose} size='xl' scrollBehavior='outside'>
                 <ModalContent className='p-5' >
                     <h1 className='font-medium' >Update Transaksi</h1>
                     <form action="" className='mt-1' >
-                        <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={handleChange}
-                            value={form.nama_transaksi} />
+                        <InputForm className='bg-bone' htmlFor="name" title="Nama Transaksi" type="text" onChange={handleChange}
+                            value={form.name} />
 
                         <div className="space-y-2">
                             <h2>Tanggal</h2>
-                            <DatePicker size='sm' onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className=" max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
+                            <DatePicker size='sm'
+                                aria-label='datepicker'
+                                value={selectedDate}
+                                className=" max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                         </div>
 
                         <div className="flex justify-between gap-2 my-4">
