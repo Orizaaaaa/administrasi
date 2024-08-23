@@ -14,17 +14,26 @@ import { camera } from '../image'
 import { getJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
 import { formatDate, formatDateStr } from '@/utils/helper'
+import useSWR from 'swr'
+import { fetcher } from '@/api/fetcher'
+import { IoClose } from 'react-icons/io5'
+import { url } from '@/api/auth'
+import { AiOutlinePlusCircle } from 'react-icons/ai'
 
-interface Account {
-    _id: string;
-    name: string;
-    account_code: number;
-    account_type: number;
-    createdAt: string;
+interface DropdownItem {
+    label: string;
+    value: string;
 }
 
+interface ItemData {
+    _id: string;
+    name: string;
+}
 
 const JurnalUmum = () => {
+    const { data } = useSWR(`${url}/account/list`, fetcher, {
+        keepPreviousData: true,
+    });
     const dateNow = new Date();
     let [date, setDate] = React.useState({
         start: parseDate((formatDate(dateNow))),
@@ -45,7 +54,7 @@ const JurnalUmum = () => {
         credit: 0
     })
     const [loadingState, setLoadingState] = useState<"loading" | "error" | "idle">("idle");
-    const [data, setData] = useState([])
+    const [dataTrans, setDataTrans] = useState([])
     const startDate = formatDateStr(date.start);
     const endDate = formatDateStr(date.end);
 
@@ -54,13 +63,19 @@ const JurnalUmum = () => {
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
     const [form, setForm] = useState({
         name: '',
-        debit: '',
-        kredit: '',
-        bukti: null as File | null,
+        image: null as File | null,
         journal_date: formatDateStr(selectedDate),
-        nominal: ''
-
-    })
+        detail: [
+            {
+                account: '',
+                debit: 0, // Updated to number
+                credit: 0, // Updated to number
+                note: "This is a note for the journal entry."
+            },
+        ],
+        data_change: false,
+        note: "This is a note for the journal entry."
+    });
 
 
     const modalOpen = (item: any) => {
@@ -74,36 +89,40 @@ const JurnalUmum = () => {
         onOpenDelete()
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, } = e.target;
-        setForm({ ...form, [name]: value });
-
-    }
-
-    const handleDropdownSelection = (selectedValue: string, option: string) => {
-        if (option === 'debit') {
-            setForm((prevForm) => ({
-                ...prevForm,
-                debit: selectedValue,
-            }));
-        } else {
-            setForm((prevForm) => ({
-                ...prevForm,
-                kredit: selectedValue,
-            }));
-        }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const { name, value } = e.target;
+        const updatedTransaksi = form.detail.map((trans, i) =>
+            i === index ? { ...trans, [name]: name === 'debit' || name === 'credit' ? Number(value) : value } : trans
+        );
+        setForm({ ...form, detail: updatedTransaksi });
     };
 
-    const dataDropdown = [
-        { label: "Aset", value: "1", },
-        { label: "Kewajiban", value: "2", },
-        { label: "Ekuitas", value: "3" },
-        { label: "Pendapatan", value: "4" },
-        { label: "Biaya Penjualan", value: "5" },
-        { label: "Pengeluaran", value: "6" },
-        { label: "pendapatan lain lain", value: "7" },
-        { label: "biaya lain lain", value: "8" },
-    ];
+    const addMoreTransaction = () => {
+        setForm((prevForm) => ({
+            ...prevForm,
+            detail: [
+                ...prevForm.detail,
+                { account: '', debit: 0, credit: 0, note: 'This is a note for the journal entry.' },
+            ],
+        }));
+    };
+
+    const handleRemoveTransaction = (index: number) => {
+        const updatedTransaksi = form.detail.filter((_, i) => i !== index);
+        setForm({ ...form, detail: updatedTransaksi });
+    };
+
+    const handleDropdownSelection = (selectedValue: string, index: number) => {
+        const updatedTransaksi = form.detail.map((trans, i) =>
+            i === index ? { ...trans, account: selectedValue } : trans
+        );
+        setForm({ ...form, detail: updatedTransaksi });
+    };
+
+    const dataDropdown: DropdownItem[] = (data?.data || []).map((item: ItemData) => ({
+        label: item.name,
+        value: item._id
+    }));
 
     const handleFileManager = (fileName: string) => {
         if (fileName === 'add') {
@@ -117,7 +136,7 @@ const JurnalUmum = () => {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, InputSelect: string) => {
         if (InputSelect === 'add') {
             const selectedImage = e.target.files?.[0];
-            setForm({ ...form, bukti: selectedImage || null });
+            setForm({ ...form, image: selectedImage || null });
         } else {
             console.log('error');
 
@@ -128,7 +147,7 @@ const JurnalUmum = () => {
     useEffect(() => {
         setLoadingState("loading");
         getJurnalUmum(startDate, endDate, (result: any) => {
-            setData(result.data);
+            setDataTrans(result.data);
             setLoadingState("idle");
 
             // Hitung total setelah data di-set
@@ -182,7 +201,7 @@ const JurnalUmum = () => {
                     loadingState={loadingState}
                     emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}
                 >
-                    {data.map((item: any) =>
+                    {dataTrans.map((item: any) =>
                         item.detail.map((detail: any) => (
                             <TableRow key={detail._id}>
                                 <TableCell>{new Date(item.journal_date).toLocaleDateString()}</TableCell>
@@ -223,38 +242,55 @@ const JurnalUmum = () => {
                                 className=" max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                         </div>
 
-                        <div className="flex justify-between gap-2 my-4">
-                            <div className="space-y-2">
-                                <h3>Debit</h3>
-                                <Autocomplete
-                                    aria-label='dropdown'
-                                    clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, debit: '' }) }}
-                                    onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
-                                    defaultItems={dataDropdown}
-                                    className="max-w-xs border-2 border-primary rounded-lg "
-                                    size='sm'
-                                >
-                                    {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                                </Autocomplete>
+                        {form.detail.map((trans, index) => (
+                            <div key={index} className="px-1 my-2">
+                                <div className="lg:flex gap-5">
+                                    <div className="space-y-2">
+                                        <h3>Akun</h3>
+                                        <Autocomplete
+                                            aria-label='dropdown'
+                                            clearButtonProps={{ size: 'sm', onClick: () => handleDropdownSelection('', index) }}
+                                            onSelectionChange={(e: any) => handleDropdownSelection(e, index)}
+                                            defaultItems={dataDropdown}
+                                            className=" w-[100%] lg:max-w-xs border-2 border-primary rounded-lg"
+                                            size='sm'
+                                        >
+                                            {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+                                        </Autocomplete>
+                                    </div>
+                                    <div className="flex items-center gap-5 mt-3 lg:mt-0">
+                                        <InputForm
+                                            className='bg-bone'
+                                            htmlFor="debit"
+                                            title="Debit"
+                                            type="number"
+                                            onChange={(e: any) => handleChange(e, index)}
+                                            value={trans.debit}
+                                        />
+                                        <InputForm
+                                            className='bg-bone'
+                                            htmlFor="credit"
+                                            title="Kredit"
+                                            type="number"
+                                            onChange={(e: any) => handleChange(e, index)}
+                                            value={trans.credit}
+                                        />
+                                        <IoClose onClick={() => handleRemoveTransaction(index)} className="cursor-pointer" color='red' />
+                                    </div>
+                                </div>
                             </div>
+                        ))}
 
-                            <div className="space-y-2">
-                                <h3>Kredit</h3>
-                                <Autocomplete
-                                    aria-label='dropdown'
-                                    clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, kredit: '' }) }}
-                                    onSelectionChange={(e: any) => handleDropdownSelection(e, 'kredit')}
-                                    defaultItems={dataDropdown}
-                                    className="max-w-xs border-2 border-primary rounded-lg "
-                                    size='sm'
-                                >
-                                    {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                                </Autocomplete>
-                            </div>
-                        </div>
+                        <AiOutlinePlusCircle
+                            className='button-add-more my-2 cursor-pointer'
+                            size={30}
+                            onClick={addMoreTransaction}
+                        />
+
+
                         <div className="images ">
-                            {form.bukti && form.bukti instanceof Blob ? (
-                                <img className="h-[140px] md:h-[140px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.bukti)} />
+                            {form.image && form.image instanceof Blob ? (
+                                <img className="h-[140px] md:h-[140px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.image)} />
                             ) : (
                                 <div className="images border-dashed border-2 border-black rounded-md h-[120px] bg-gray-300">
                                     <button className="flex-col justify-center items-center h-full w-full " type="button" onClick={() => handleFileManager('add')} >
@@ -270,7 +306,7 @@ const JurnalUmum = () => {
                                 onChange={(e) => handleImageChange(e, 'add')}
                             />
                             <div className="flex justify-center gap-3 my-3">
-                                <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.bukti === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
+                                <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.image === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
                             </div>
                         </div>
                         <div className="flex justify-end gap-3">
