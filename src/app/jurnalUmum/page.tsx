@@ -6,7 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragemnts/modal/modal'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
@@ -52,6 +52,11 @@ const JurnalUmum = () => {
         start: parseDate((formatDate(dateNow))),
         end: parseDate((formatDate(dateNow))),
     });
+    const [total, setTotal] = useState({
+        debit: 0,
+        credit: 0
+    })
+    const [loadingState, setLoadingState] = useState<"loading" | "error" | "idle">("idle");
     const [data, setData] = useState([])
     const startDate = formatDateStr(date.start);
     const endDate = formatDateStr(date.end);
@@ -130,11 +135,26 @@ const JurnalUmum = () => {
 
 
     useEffect(() => {
+        setLoadingState("loading");
         getJurnalUmum(startDate, endDate, (result: any) => {
-            setData(result.data)
+            setData(result.data);
+            setLoadingState("idle");
+
+            // Hitung total setelah data di-set
+            let calculatedTotal = { debit: 0, credit: 0 };
+            result.data.forEach((item: any) => {
+                item.detail.forEach((detail: any) => {
+                    calculatedTotal.debit += detail.debit;
+                    calculatedTotal.credit += detail.credit;
+                });
+            });
+            setTotal(calculatedTotal);
         });
     }, [startDate, endDate]);
+
+
     console.log(data);
+    console.log(total);
 
 
     return (
@@ -143,10 +163,10 @@ const JurnalUmum = () => {
                 <h1 className='text-xl font-medium '>Jurnal Umum</h1>
                 <p className='text-slate-500 text-small' >Semua pencatatan transaksi akan masuk dan di catat ke dalam jurnal umum</p>
                 <div className="total mt-4">
-                    <h1>Total Debit : Rp. 1.000.000</h1>
-                    <h1>Total Kredit: Rp. 1.000.000</h1>
+                    <h1>Total Debit : Rp {total.debit}</h1>
+                    <h1>Total Kredit: Rp {total.credit}</h1>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
                     <ButtonSecondary className=' px-4 rounded-md'>Download dalam bentuk Excel</ButtonSecondary>
                     <DateRangePicker
                         visibleMonths={2}
@@ -166,7 +186,11 @@ const JurnalUmum = () => {
                     <TableColumn>KREDIT</TableColumn>
                     <TableColumn>ACTION</TableColumn>
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    loadingContent={<Spinner />}
+                    loadingState={loadingState}
+                    emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}
+                >
                     {data.map((item: any) =>
                         item.detail.map((detail: any) => (
                             <TableRow key={detail._id}>

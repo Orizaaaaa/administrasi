@@ -204,7 +204,8 @@ const ListAccount = () => {
                     <TableColumn>TYPE ACCOUNT</TableColumn>
                     <TableColumn>ACTION</TableColumn>
                 </TableHeader>
-                <TableBody>
+                <TableBody
+                    emptyContent={'Akun list kosong'}>
                     {data?.data?.map((item: any, index: number) => (
                         <TableRow key={index}>
                             <TableCell>{item.name}</TableCell>
