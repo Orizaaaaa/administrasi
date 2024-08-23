@@ -6,7 +6,7 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalDefault from '@/components/fragemnts/modal/modal'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Modal, ModalContent, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
@@ -74,7 +74,9 @@ const JurnalUmum = () => {
         nominal: ''
 
     })
-    const modalOpen = () => {
+    const modalOpen = (item: any) => {
+        console.log('aku item modal', item);
+
         onOpen()
     }
     const modalDeleteOpen = () => {
@@ -202,7 +204,7 @@ const JurnalUmum = () => {
                                 <TableCell>{detail.credit.toLocaleString()}</TableCell>
                                 <TableCell>
                                     <div className="flex w-full justify-start gap-2 items-center">
-                                        <button onClick={() => modalOpen()} >
+                                        <button onClick={() => modalOpen(item)} >
                                             <FaPenToSquare size={20} />
                                         </button>
                                         <button onClick={() => modalDeleteOpen()} >
@@ -216,72 +218,80 @@ const JurnalUmum = () => {
                 </TableBody>
             </Table>
 
-            <ModalDefault isOpen={isOpen} onClose={onClose} >
-                <h1 className='font-medium' >Update Transaksi</h1>
-                <form action="" className='mt-1' >
-                    <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={handleChange}
-                        value={form.nama_transaksi} />
-                    <div className="mt-4 space-y-2">
-                        <h2>Tanggal</h2>
-                        <DatePicker size='sm' onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
-                    </div>
-                    <div className="flex gap-5 my-4">
-                        <div className="space-y-2">
-                            <h3>Debit</h3>
-                            <Autocomplete
-                                aria-label='dropdown'
-                                clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, debit: '' }) }}
-                                onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
-                                defaultItems={dataDropdown}
-                                className="max-w-xs border-2 border-primary rounded-lg "
-                                size='sm'
-                            >
-                                {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                            </Autocomplete>
-                        </div>
+            {/* <ModalDefault isOpen={isOpen} onClose={onClose} >
+
+            </ModalDefault> */}
+
+
+            <Modal isOpen={isOpen} onClose={onClose} size='xl' scrollBehavior='outside'>
+                <ModalContent className='p-5' >
+                    <h1 className='font-medium' >Update Transaksi</h1>
+                    <form action="" className='mt-1' >
+                        <InputForm className='bg-bone' htmlFor="nama_transaksi" title="Nama Transaksi" type="text" onChange={handleChange}
+                            value={form.nama_transaksi} />
 
                         <div className="space-y-2">
-                            <h3>Kredit</h3>
-                            <Autocomplete
-                                aria-label='dropdown'
-                                clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, kredit: '' }) }}
-                                onSelectionChange={(e: any) => handleDropdownSelection(e, 'kredit')}
-                                defaultItems={dataDropdown}
-                                className="max-w-xs border-2 border-primary rounded-lg "
-                                size='sm'
-                            >
-                                {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                            </Autocomplete>
+                            <h2>Tanggal</h2>
+                            <DatePicker size='sm' onChange={(e: any) => setForm({ ...form, tanggal: e })} value={form.tanggal} aria-label='datepicker' className=" max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
                         </div>
-                    </div>
-                    <InputForm className='bg-bone' htmlFor="nominal" title="Nominal Transaksi" type="text" onChange={handleChange} value={form.nominal} />
-                    <div className="images ">
-                        {form.bukti && form.bukti instanceof Blob ? (
-                            <img className="h-[170px] md:h-[300px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.bukti)} />
-                        ) : (
-                            <div className="images border-dashed border-2 border-black rounded-md h-[140px] bg-gray-300">
-                                <button className="flex-col justify-center items-center h-full w-full " type="button" onClick={() => handleFileManager('add')} >
-                                    <Image className="w-20 h-20 mx-auto" src={camera} alt='cam' />
-                                    <p>*Masukan bukti transaksi</p>
-                                </button>
+
+                        <div className="flex justify-between gap-2 my-4">
+                            <div className="space-y-2">
+                                <h3>Debit</h3>
+                                <Autocomplete
+                                    aria-label='dropdown'
+                                    clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, debit: '' }) }}
+                                    onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
+                                    defaultItems={dataDropdown}
+                                    className="max-w-xs border-2 border-primary rounded-lg "
+                                    size='sm'
+                                >
+                                    {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+                                </Autocomplete>
                             </div>
-                        )}
-                        <input
-                            type="file"
-                            className="hidden"
-                            id="image-input-add"
-                            onChange={(e) => handleImageChange(e, 'add')}
-                        />
-                        <div className="flex justify-center gap-3 mt-3">
-                            <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.bukti === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
+
+                            <div className="space-y-2">
+                                <h3>Kredit</h3>
+                                <Autocomplete
+                                    aria-label='dropdown'
+                                    clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, kredit: '' }) }}
+                                    onSelectionChange={(e: any) => handleDropdownSelection(e, 'kredit')}
+                                    defaultItems={dataDropdown}
+                                    className="max-w-xs border-2 border-primary rounded-lg "
+                                    size='sm'
+                                >
+                                    {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+                                </Autocomplete>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex justify-end gap-3">
-                        <ButtonPrimary className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
-                        <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onClose}>Tidak</ButtonSecondary>
-                    </div>
-                </form>
-            </ModalDefault>
+                        <div className="images ">
+                            {form.bukti && form.bukti instanceof Blob ? (
+                                <img className="h-[140px] md:h-[140px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.bukti)} />
+                            ) : (
+                                <div className="images border-dashed border-2 border-black rounded-md h-[120px] bg-gray-300">
+                                    <button className="flex-col justify-center items-center h-full w-full " type="button" onClick={() => handleFileManager('add')} >
+                                        <Image className="w-15 h-15 mx-auto" src={camera} alt='cam' />
+                                        <p>*Masukan bukti transaksi</p>
+                                    </button>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                className="hidden"
+                                id="image-input-add"
+                                onChange={(e) => handleImageChange(e, 'add')}
+                            />
+                            <div className="flex justify-center gap-3 my-3">
+                                <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.bukti === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <ButtonPrimary className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
+                            <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onClose}>Tidak</ButtonSecondary>
+                        </div>
+                    </form>
+                </ModalContent>
+            </Modal>
 
             <ModalAlert isOpen={openDelete} onClose={onCloseDelete} >
                 <h1 className='text-lg' >Apakah anda yakin akan menghapus transaksi ini ? </h1>
