@@ -33,6 +33,7 @@ interface Calendar {
 
 const CatatTransaksi = () => {
 
+    //1. perbaiki bug multiple transaction
     const { data } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });

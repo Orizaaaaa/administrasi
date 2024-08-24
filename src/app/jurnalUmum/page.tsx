@@ -54,6 +54,11 @@ const JurnalUmum = () => {
         debit: 0,
         credit: 0
     })
+
+    const [errorMsg, setErrorMsg] = useState('')
+    const [totalDebit, setTotalDebit] = useState(0)
+    const [totalKredit, setTotalKredit] = useState(0);
+    const [isBalanced, setIsBalanced] = useState(true);
     const [id, setId] = useState("")
     const [loadingState, setLoadingState] = useState<"loading" | "error" | "idle">("idle");
     const [dataTrans, setDataTrans] = useState([])
@@ -113,6 +118,15 @@ const JurnalUmum = () => {
         );
         setForm({ ...form, detail: updatedTransaksi });
     };
+
+    useEffect(() => {
+        const debit = form.detail.reduce((sum, trans) => sum + (trans.debit || 0), 0);
+        const kredit = form.detail.reduce((sum, trans) => sum + (trans.credit || 0), 0);
+
+        setTotalDebit(debit);
+        setTotalKredit(kredit);
+        setIsBalanced(debit === kredit);
+    }, [form.detail]);
 
     const addMoreTransaction = () => {
         setForm((prevForm) => ({
@@ -180,8 +194,18 @@ const JurnalUmum = () => {
     }, [startDate, endDate]);
 
     const handleUpdate = async (e: any) => {
+        //1. validasi balance
+        //2. detail transaction ga boleh bisa di tambah
+
         e.preventDefault()
-        if (form.image instanceof Blob) {
+        const allZero = form.detail.every(trans => trans.debit === 0 && trans.credit === 0);
+        if (!isBalanced) {
+            setErrorMsg('Transaksi tidak balance');
+        } else if (allZero) {
+            setErrorMsg('Transaksi tidak dapat diproses karena debit dan kredit semuanya 0');
+        } else if (form.name === '' || form.image === null) {
+            setErrorMsg('Nama Transaksi dan bukti tidak boleh kosong');
+        } else if (form.image instanceof Blob) {
             const imageUrl = await postImage({ image: form.image });
             if (imageUrl) {
                 const data = { ...form, image: imageUrl };
@@ -190,18 +214,34 @@ const JurnalUmum = () => {
                         getJurnalUmum(startDate, endDate, (result: any) => {
                             setDataTrans(result.data);
                             setLoadingState("idle");
+                            let calculatedTotal = { debit: 0, credit: 0 };
+                            result.data.forEach((item: any) => {
+                                item.detail.forEach((detail: any) => {
+                                    calculatedTotal.debit += detail.debit;
+                                    calculatedTotal.credit += detail.credit;
+                                });
+                            });
+                            setTotal(calculatedTotal);
                         });
                         onClose()
+
                     }
                 })
             }
-
         } else {
             await updateJurnalUmum(id, form, (result: any) => {
                 if (result) {
                     getJurnalUmum(startDate, endDate, (result: any) => {
                         setDataTrans(result.data);
                         setLoadingState("idle");
+                        let calculatedTotal = { debit: 0, credit: 0 };
+                        result.data.forEach((item: any) => {
+                            item.detail.forEach((detail: any) => {
+                                calculatedTotal.debit += detail.debit;
+                                calculatedTotal.credit += detail.credit;
+                            });
+                        });
+                        setTotal(calculatedTotal);
                     });
                     onClose()
                 }
@@ -329,6 +369,12 @@ const JurnalUmum = () => {
                             </div>
                         ))}
 
+                        <div className="my-4 flex justify-end">
+                            <p className={`text-small  ${isBalanced ? 'text-primary' : 'text-red'}`}>
+                                {totalDebit} | {totalKredit}
+                            </p>
+                        </div>
+
                         <AiOutlinePlusCircle
                             className='button-add-more my-2 cursor-pointer'
                             size={30}
@@ -356,6 +402,7 @@ const JurnalUmum = () => {
                                 <button className={`border-2 border-primary  text-primary px-4 py-2 rounded-md ${form.image === null ? 'hidden' : ''}`} type="button" onClick={() => handleFileManager('add')} >Ubah Gambar</button>
                             </div>
                         </div>
+                        <p className='my-2 text-red' > <i>{errorMsg}</i> </p>
                         <div className="flex justify-end gap-3">
                             <ButtonPrimary typeButon={'submit'} className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
                             <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onClose}>Tidak</ButtonSecondary>
