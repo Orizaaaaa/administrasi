@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
 import { camera } from '../image'
-import { deleteJurnal, getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
+import { deleteJurnal, downloadJurnal, getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
 import { formatDate, formatDateStr } from '@/utils/helper'
 import useSWR from 'swr'
@@ -269,6 +269,26 @@ const JurnalUmum = () => {
         })
     }
 
+    const handleDownload = () => {
+        downloadJurnal(startDate, endDate, (result: any) => {
+            if (result instanceof Blob) {
+                // Jika hasil adalah Blob, kita lanjutkan dengan download
+                const url = window.URL.createObjectURL(result);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `jurnal-${startDate}-${endDate}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                console.log('Download success');
+            } else {
+                // Jika tidak, anggap itu sebagai error
+                console.error('Download failed:', result);
+            }
+        });
+    };
+
     console.log(form);
     console.log(data);
     console.log(total);
@@ -284,7 +304,7 @@ const JurnalUmum = () => {
                     <h1>Total Kredit: Rp {total.credit}</h1>
                 </div>
                 <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
-                    <ButtonSecondary className=' px-4 rounded-md'>Download dalam bentuk Excel</ButtonSecondary>
+                    <ButtonSecondary onClick={handleDownload} className=' px-4 rounded-md'>Download dalam bentuk Excel</ButtonSecondary>
                     <DateRangePicker
                         visibleMonths={2}
                         size='sm' onChange={setDate} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg"

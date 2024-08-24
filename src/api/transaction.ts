@@ -40,3 +40,15 @@ export const deleteJurnal = async (id: string, callback: any) => {
             callback(err);
         });
 }
+
+export const downloadJurnal = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get(`/journal/export`, {
+        params: { startDate, endDate },
+        responseType: 'blob'  // Mengharapkan response sebagai Blob (file)
+    })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+}
