@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
 import { camera } from '../image'
-import { getJurnalUmum } from '@/api/transaction'
+import { getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
 import { formatDate, formatDateStr } from '@/utils/helper'
 import useSWR from 'swr'
@@ -19,6 +19,7 @@ import { fetcher } from '@/api/fetcher'
 import { IoClose } from 'react-icons/io5'
 import { url } from '@/api/auth'
 import { AiOutlinePlusCircle } from 'react-icons/ai'
+import { postImage } from '@/api/imagePost'
 
 interface DropdownItem {
     label: string;
@@ -53,6 +54,7 @@ const JurnalUmum = () => {
         debit: 0,
         credit: 0
     })
+    const [id, setId] = useState("")
     const [loadingState, setLoadingState] = useState<"loading" | "error" | "idle">("idle");
     const [dataTrans, setDataTrans] = useState([])
     const startDate = formatDateStr(date.start);
@@ -79,11 +81,26 @@ const JurnalUmum = () => {
 
 
     const modalOpen = (item: any) => {
+        setId(item._id);
         const date = new Date(item.journal_date);
         setSelectedDate(parseDate(formatDate(date)));
-        onOpen()
-    }
+        setForm({
+            ...form,
+            name: item.name, // Ambil nilai name dari item
+            image: item.image, // Ambil nilai image dari item
+            detail: item.detail.map((d: any) => ({
+                account: d.account, // Ambil nilai account dari detail item
+                debit: d.debit, // Ambil nilai debit dari detail item
+                credit: d.credit, // Ambil nilai credit dari detail item
+                note: d.note // Ambil nilai note dari detail item
+            })),
+            data_change: item.data_change, // Ambil nilai data_change dari item
+            note: item.note // Ambil nilai note dari item
+        });
 
+        // Open the modal
+        onOpen();
+    };
 
     const modalDeleteOpen = () => {
         onOpenDelete()
@@ -162,6 +179,37 @@ const JurnalUmum = () => {
         });
     }, [startDate, endDate]);
 
+    const handleUpdate = async (e: any) => {
+        e.preventDefault()
+        if (form.image instanceof Blob) {
+            const imageUrl = await postImage({ image: form.image });
+            if (imageUrl) {
+                const data = { ...form, image: imageUrl };
+                updateJurnalUmum(id, data, (result: any) => {
+                    if (result) {
+                        getJurnalUmum(startDate, endDate, (result: any) => {
+                            setDataTrans(result.data);
+                            setLoadingState("idle");
+                        });
+                        onClose()
+                    }
+                })
+            }
+
+        } else {
+            await updateJurnalUmum(id, form, (result: any) => {
+                if (result) {
+                    getJurnalUmum(startDate, endDate, (result: any) => {
+                        setDataTrans(result.data);
+                        setLoadingState("idle");
+                    });
+                    onClose()
+                }
+            })
+        }
+
+    }
+
     console.log(form);
     console.log(data);
     console.log(total);
@@ -230,8 +278,8 @@ const JurnalUmum = () => {
             <Modal isOpen={isOpen} onClose={onClose} size='xl' scrollBehavior='outside'>
                 <ModalContent className='p-5' >
                     <h1 className='font-medium' >Update Transaksi</h1>
-                    <form action="" className='mt-1' >
-                        <InputForm className='bg-bone' htmlFor="name" title="Nama Transaksi" type="text" onChange={handleChange}
+                    <form className='mt-1' onSubmit={handleUpdate} >
+                        <InputForm className='bg-bone' htmlFor="name" title="Nama Transaksi" type="text" onChange={(e: any) => setForm({ ...form, name: e.target.value })}
                             value={form.name} />
 
                         <div className="space-y-2">
@@ -292,10 +340,9 @@ const JurnalUmum = () => {
                             {form.image && form.image instanceof Blob ? (
                                 <img className="h-[140px] md:h-[140px] w-auto mx-auto rounded-md" src={URL.createObjectURL(form.image)} />
                             ) : (
-                                <div className="images border-dashed border-2 border-black rounded-md h-[120px] bg-gray-300">
+                                <div className="images border-dashed border-2 border-black rounded-md h-[130px] bg-gray-300 p-2">
                                     <button className="flex-col justify-center items-center h-full w-full " type="button" onClick={() => handleFileManager('add')} >
-                                        <Image className="w-15 h-15 mx-auto" src={camera} alt='cam' />
-                                        <p>*Masukan bukti transaksi</p>
+                                        <img className="w-auto h-full mx-auto" src={form.image ? form.image : ''} alt='cam' />
                                     </button>
                                 </div>
                             )}
@@ -310,7 +357,7 @@ const JurnalUmum = () => {
                             </div>
                         </div>
                         <div className="flex justify-end gap-3">
-                            <ButtonPrimary className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
+                            <ButtonPrimary typeButon={'submit'} className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
                             <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onClose}>Tidak</ButtonSecondary>
                         </div>
                     </form>

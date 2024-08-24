@@ -1,3 +1,4 @@
+import { url } from "inspector";
 import { axiosInterceptor } from "./axiosInterceptor"
 
 export const createTransaction = async (form: any, callback: any) => {
@@ -20,4 +21,13 @@ export const getJurnalUmum = (startDate: string, endDate: string, callback: any)
             callback(err);
         });
 
+}
+
+export const updateJurnalUmum = async (id: string, form: any, callback: any) => {
+    await axiosInterceptor.put(`journal/${id}`, form)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
 }
