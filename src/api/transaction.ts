@@ -31,3 +31,12 @@ export const updateJurnalUmum = async (id: string, form: any, callback: any) => 
             callback(err);
         });
 }
+
+export const deleteJurnal = async (id: string, callback: any) => {
+    axiosInterceptor.delete(`journal/${id}`)
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+}

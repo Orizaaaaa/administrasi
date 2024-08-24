@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
 import { camera } from '../image'
-import { getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
+import { deleteJurnal, getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
 import { formatDate, formatDateStr } from '@/utils/helper'
 import useSWR from 'swr'
@@ -107,7 +107,8 @@ const JurnalUmum = () => {
         onOpen();
     };
 
-    const modalDeleteOpen = () => {
+    const modalDeleteOpen = (item: any) => {
+        setId(item._id);
         onOpenDelete()
     }
 
@@ -250,6 +251,24 @@ const JurnalUmum = () => {
 
     }
 
+    const handleDelete = async () => {
+        await deleteJurnal(id, () => {
+            onCloseDelete()
+            getJurnalUmum(startDate, endDate, (result: any) => {
+                setDataTrans(result.data);
+                setLoadingState("idle");
+                let calculatedTotal = { debit: 0, credit: 0 };
+                result.data.forEach((item: any) => {
+                    item.detail.forEach((detail: any) => {
+                        calculatedTotal.debit += detail.debit;
+                        calculatedTotal.credit += detail.credit;
+                    });
+                });
+                setTotal(calculatedTotal);
+            });
+        })
+    }
+
     console.log(form);
     console.log(data);
     console.log(total);
@@ -303,7 +322,7 @@ const JurnalUmum = () => {
                                         <button onClick={() => modalOpen(item)} >
                                             <FaPenToSquare size={20} />
                                         </button>
-                                        <button onClick={() => modalDeleteOpen()} >
+                                        <button onClick={() => modalDeleteOpen(item)} >
                                             <MdOutlineDelete size={24} color='red' />
                                         </button>
                                     </div>
@@ -414,7 +433,7 @@ const JurnalUmum = () => {
             <ModalAlert isOpen={openDelete} onClose={onCloseDelete} >
                 <h1 className='text-lg' >Apakah anda yakin akan menghapus transaksi ini ? </h1>
                 <div className="flex justify-end gap-3">
-                    <ButtonPrimary className='py-2 px-5 rounded-md font-medium' >Ya</ButtonPrimary>
+                    <ButtonPrimary className='py-2 px-5 rounded-md font-medium' onClick={handleDelete}  >Ya</ButtonPrimary>
                     <ButtonSecondary className='py-2 px-5 rounded-md font-medium' onClick={onCloseDelete}>Tidak</ButtonSecondary>
                 </div>
             </ModalAlert>
