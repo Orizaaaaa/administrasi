@@ -58,10 +58,13 @@ const Login = () => {
       if (status) {
         const tokenCookies = document.cookie = `token=${res.data.token}`
         if (tokenCookies) {
+
           console.log(res.data);
-          localStorage.setItem('name', res?.data?.username)
-          localStorage.setItem('role', res?.data?.role)
-          localStorage.setItem('token', res?.data?.token)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('name', res?.data?.username);
+            localStorage.setItem('role', res?.data?.role);
+            localStorage.setItem('token', res?.data?.token);
+          }
           router.push('/dashboard');
           setLoading(false)
         }
