@@ -305,8 +305,8 @@ const JurnalUmum = () => {
                 <h1 className='text-xl font-medium '>Jurnal Umum</h1>
                 <p className='text-slate-500 text-small' >Semua pencatatan transaksi akan masuk dan di catat ke dalam jurnal umum</p>
                 <div className="total mt-4">
-                    <h1>Total Debit : Rp {total.debit}</h1>
-                    <h1>Total Kredit: Rp {total.credit}</h1>
+                    <h1>Total Debit : Rp {total.debit.toLocaleString('id-ID')}</h1>
+                    <h1>Total Kredit: Rp {total.credit.toLocaleString('id-ID')}</h1>
                 </div>
                 <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
                     <ButtonSecondary onClick={handleDownload} className=' px-4 rounded-md'>Download dalam bentuk Excel</ButtonSecondary>
