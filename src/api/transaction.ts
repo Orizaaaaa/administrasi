@@ -71,3 +71,12 @@ export const getNeraca = (startDate: string, endDate: string, callback: any) => 
         });
 
 }
+export const GetLabaRugi = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get('/balance/pendapatan-beban', { params: { startDate: startDate, endDate: endDate } })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+
+}
