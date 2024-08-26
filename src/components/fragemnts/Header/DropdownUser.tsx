@@ -5,8 +5,8 @@ import { capitalizeWords } from "@/utils/helper";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  // const name = localStorage.getItem('name')
-  // const role = localStorage.getItem('role')
+  const name = typeof window !== 'undefined' ? localStorage.getItem('name') : null;
+  const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
 
@@ -46,10 +46,10 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {/* {name ? capitalizeWords(name) : "User"} */}
+            {name ? capitalizeWords(name) : "User"}
           </span>
           <span className="block text-xs">
-            {/* {role ? capitalizeWords(role) : "Pengguna"} */}
+            {role ? capitalizeWords(role) : "Pengguna"}
           </span>
         </span>
 
