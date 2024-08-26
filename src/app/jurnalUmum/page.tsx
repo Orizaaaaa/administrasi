@@ -6,14 +6,12 @@ import InputForm from '@/components/elements/input/InputForm'
 import ModalAlert from '@/components/fragemnts/modal/modalAlert'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Modal, ModalContent, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
-import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { FaPenToSquare } from 'react-icons/fa6'
 import { MdOutlineDelete } from 'react-icons/md'
-import { camera } from '../image'
 import { deleteJurnal, downloadJurnal, getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
-import { dateFirst, formatDate, formatDateStr, getFirstDayOfMonth } from '@/utils/helper'
+import { dateFirst, formatDate, formatDateStr } from '@/utils/helper'
 import useSWR from 'swr'
 import { fetcher } from '@/api/fetcher'
 import { IoClose } from 'react-icons/io5'
@@ -197,10 +195,11 @@ const JurnalUmum = () => {
     }, [startDate, endDate]);
 
     const handleUpdate = async (e: any) => {
-        //1. validasi balance
-        //2. detail transaction ga boleh bisa di tambah
 
         e.preventDefault()
+        const isAccountEmpty = form.detail.some(item => {
+            return typeof item.account === 'string' && item.account.trim() === '';
+        });
         const allZero = form.detail.every(trans => trans.debit === 0 && trans.credit === 0);
         if (!isBalanced) {
             setErrorMsg('Transaksi tidak balance');
@@ -208,6 +207,8 @@ const JurnalUmum = () => {
             setErrorMsg('Transaksi tidak dapat diproses karena debit dan kredit semuanya 0');
         } else if (form.name === '' || form.image === null) {
             setErrorMsg('Nama Transaksi dan bukti tidak boleh kosong');
+        } else if (isAccountEmpty) {
+            setErrorMsg('Akun tidak boleh kosong')
         } else if (form.image instanceof Blob) {
             const imageUrl = await postImage({ image: form.image });
             if (imageUrl) {
@@ -215,6 +216,7 @@ const JurnalUmum = () => {
                 updateJurnalUmum(id, data, (result: any) => {
                     if (result) {
                         getJurnalUmum(startDate, endDate, (result: any) => {
+                            setErrorMsg('')
                             setDataTrans(result.data);
                             setLoadingState("idle");
                             let calculatedTotal = { debit: 0, credit: 0 };
@@ -235,6 +237,7 @@ const JurnalUmum = () => {
             await updateJurnalUmum(id, form, (result: any) => {
                 if (result) {
                     getJurnalUmum(startDate, endDate, (result: any) => {
+                        setErrorMsg('')
                         setDataTrans(result.data);
                         setLoadingState("idle");
                         let calculatedTotal = { debit: 0, credit: 0 };
@@ -318,7 +321,7 @@ const JurnalUmum = () => {
             <Table className='mt-7 border-hidden' aria-label="Example static collection table">
                 <TableHeader>
                     <TableColumn>TANGGAL</TableColumn>
-                    <TableColumn>KETERANGAN AKUN</TableColumn>
+                    <TableColumn>NAMA AKUN</TableColumn>
                     <TableColumn>KETERANGAN TRANSAKSI</TableColumn>
                     <TableColumn>REF</TableColumn>
                     <TableColumn>DEBIT</TableColumn>
@@ -331,26 +334,35 @@ const JurnalUmum = () => {
                     emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}
                 >
                     {dataTrans.map((item: any) =>
-                        item.detail.map((detail: any) => (
-                            <TableRow key={detail._id}>
-                                <TableCell>{new Date(item.journal_date).toLocaleDateString()}</TableCell>
-                                <TableCell>{detail.account.name}</TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>{detail.account.account_code}</TableCell>
-                                <TableCell>{detail.debit.toLocaleString()}</TableCell>
-                                <TableCell>{detail.credit.toLocaleString()}</TableCell>
-                                <TableCell>
-                                    <div className="flex w-full justify-start gap-2 items-center">
-                                        <button onClick={() => modalOpen(item)} >
-                                            <FaPenToSquare size={20} />
-                                        </button>
-                                        <button onClick={() => modalDeleteOpen(item)} >
-                                            <MdOutlineDelete size={24} color='red' />
-                                        </button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))
+                        item.detail.map((detail: any, index: number) => {
+                            const uniqueDates = new Map();
+                            const isFirstEntry = index === 0 && !uniqueDates.has(item.journal_date);
+                            if (isFirstEntry) {
+                                uniqueDates.set(item.journal_date, true);
+                            }
+                            return (
+                                <TableRow key={detail._id}>
+                                    <TableCell>
+                                        {isFirstEntry ? new Date(item.journal_date).toLocaleDateString() : ''}
+                                    </TableCell>
+                                    <TableCell>{detail.account.name}</TableCell>
+                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell>{detail.account.account_code}</TableCell>
+                                    <TableCell>{detail.debit.toLocaleString()}</TableCell>
+                                    <TableCell>{detail.credit.toLocaleString()}</TableCell>
+                                    <TableCell>
+                                        <div className="flex w-full justify-start gap-2 items-center">
+                                            <button onClick={() => modalOpen(item)} >
+                                                <FaPenToSquare size={20} />
+                                            </button>
+                                            <button onClick={() => modalDeleteOpen(item)} >
+                                                <MdOutlineDelete size={24} color='red' />
+                                            </button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })
                     )}
                 </TableBody>
             </Table>
