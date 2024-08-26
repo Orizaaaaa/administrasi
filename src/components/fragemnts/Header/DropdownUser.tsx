@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { capitalizeWords } from "@/utils/helper";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -44,9 +45,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {localStorage.getItem("name")}
           </span>
-          <span className="block text-xs">UX Designer</span>
+          <span className="block text-xs">{localStorage.getItem("role")}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">

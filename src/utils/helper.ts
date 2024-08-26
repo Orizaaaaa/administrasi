@@ -14,12 +14,6 @@ export function formatCatrgory(text: string, maxLength: number = 34): string {
     return text;
 }
 
-export function formatTitle(text: string, maxLength: number = 20): string {
-    if (text.length > maxLength) {
-        return text.slice(0, maxLength) + "...";
-    }
-    return text;
-}
 export const changeTypeAccount = (type: number): string => {
     switch (type) {
         case 1:

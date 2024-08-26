@@ -59,6 +59,8 @@ const Login = () => {
         const tokenCookies = document.cookie = `token=${res.data.token}`
         if (tokenCookies) {
           console.log(res.data);
+          localStorage.setItem('name', res.data.username)
+          localStorage.setItem('role', res.data.role)
           localStorage.setItem('token', res.data.token)
           router.push('/dashboard');
           setLoading(false)
@@ -87,7 +89,7 @@ const Login = () => {
             <InputForm className='form-input-login' htmlFor="password" onChange={handleChange} type={typePassword} value={form.password} placeholder="Masukkan Kata Sandi" />
           </div>
           <p className='text-red my-3 text-sm' >{errorLogin}</p>
-          <ButtonPrimary disabled={disabled} className={`rounded-lg w-full mb-3 font-medium py-2 `}>
+          <ButtonPrimary typeButon={"submit"} disabled={disabled} className={`rounded-lg w-full mb-3 font-medium py-2 `}>
             {loading ? <Spinner className={`w-5 h-5 `} size="sm" color="white" /> : 'Login'}
           </ButtonPrimary>
         </form>
