@@ -18,6 +18,7 @@ import { IoClose } from 'react-icons/io5'
 import { url } from '@/api/auth'
 import { AiOutlinePlusCircle } from 'react-icons/ai'
 import { postImage } from '@/api/imagePost'
+import ModalDefault from '@/components/fragemnts/modal/modal'
 
 interface DropdownItem {
     label: string;
@@ -54,7 +55,7 @@ const JurnalUmum = () => {
         debit: 0,
         credit: 0
     })
-
+    const [bukti, setBukti] = useState('')
     const [errorMsg, setErrorMsg] = useState('')
     const [totalDebit, setTotalDebit] = useState(0)
     const [totalKredit, setTotalKredit] = useState(0);
@@ -68,6 +69,7 @@ const JurnalUmum = () => {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: openDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure()
+    const { isOpen: openBukti, onOpen: onOpenBukti, onClose: onCloseBukti } = useDisclosure()
     const [form, setForm] = useState({
         name: '',
         image: null as File | null,
@@ -110,6 +112,13 @@ const JurnalUmum = () => {
     const modalDeleteOpen = (item: any) => {
         setId(item._id);
         onOpenDelete()
+    }
+
+    const modalBuktiOpen = (item: any) => {
+        setBukti(item.image)
+        console.log('toll', item);
+
+        onOpenBukti()
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -295,7 +304,7 @@ const JurnalUmum = () => {
     };
 
     console.log(form);
-    console.log(data);
+    console.log(dataTrans);
     console.log(total);
 
 
@@ -321,6 +330,8 @@ const JurnalUmum = () => {
             <Table className='mt-7 border-hidden' aria-label="Example static collection table">
                 <TableHeader>
                     <TableColumn>TANGGAL</TableColumn>
+                    <TableColumn>BUKTI</TableColumn>
+                    <TableColumn>NAMA TRANSAKSI</TableColumn>
                     <TableColumn>NAMA AKUN</TableColumn>
                     <TableColumn>KETERANGAN TRANSAKSI</TableColumn>
                     <TableColumn>REF</TableColumn>
@@ -335,18 +346,31 @@ const JurnalUmum = () => {
                 >
                     {dataTrans.map((item: any) =>
                         item.detail.map((detail: any, index: number) => {
-                            const uniqueDates = new Map();
-                            const isFirstEntry = index === 0 && !uniqueDates.has(item.journal_date);
+                            const arrayMap = new Map();
+                            const firstEntryName = index === 0 && !arrayMap.has(item.name);
+                            const firstEntryImg = index === 0 && !arrayMap.has(item.image);
+                            const isFirstEntry = index === 0 && !arrayMap.has(item.journal_date);
                             if (isFirstEntry) {
-                                uniqueDates.set(item.journal_date, true);
+                                arrayMap.set(item.journal_date, true);
+                            } else if (firstEntryName) {
+                                arrayMap.set(item.name, true);
+                            } else if (firstEntryImg) {
+                                arrayMap.set(item.image, true);
                             }
                             return (
                                 <TableRow key={detail._id}>
                                     <TableCell>
                                         {isFirstEntry ? new Date(item.journal_date).toLocaleDateString() : ''}
                                     </TableCell>
+                                    <TableCell>
+                                        {firstEntryImg ?
+                                            <ButtonPrimary onClick={() => modalBuktiOpen(item)} className='w-full py-1 px-3 rounded-md' >
+                                                Lihat
+                                            </ButtonPrimary> : ''}
+                                    </TableCell>
+                                    <TableCell>{firstEntryName ? item.name : ''}</TableCell>
                                     <TableCell>{detail.account.name}</TableCell>
-                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell>{detail.note}</TableCell>
                                     <TableCell>{detail.account.account_code}</TableCell>
                                     <TableCell>{detail.debit.toLocaleString()}</TableCell>
                                     <TableCell>{detail.credit.toLocaleString()}</TableCell>
@@ -463,6 +487,12 @@ const JurnalUmum = () => {
                     </form>
                 </ModalContent>
             </Modal>
+
+            <ModalDefault isOpen={openBukti} onClose={onCloseBukti}>
+                <div className="p-4">
+                    <img className='rounded-md' src={bukti} alt="bukti" />
+                </div>
+            </ModalDefault>
 
             <ModalAlert isOpen={openDelete} onClose={onCloseDelete} >
                 <h1 className='text-lg' >Apakah anda yakin akan menghapus transaksi ini ? </h1>
