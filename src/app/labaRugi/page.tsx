@@ -64,7 +64,7 @@ const LabaRugi = () => {
                                 <TableCell>{item.account_code}</TableCell>
                                 <TableCell>{item.totalCredit.toLocaleString()}</TableCell>
                                 <TableCell>{item.totalDebit.toLocaleString()}</TableCell>
-                                <TableCell>{item?.total.toLocaleString()} </TableCell>
+                                <TableCell className='font-bold' >{item?.total.toLocaleString()} </TableCell>
                             </TableRow>
                         ))}
 
@@ -90,7 +90,7 @@ const LabaRugi = () => {
                                 <TableCell>{item.account_code}</TableCell>
                                 <TableCell>{item.totalCredit.toLocaleString()}</TableCell>
                                 <TableCell>{item.totalDebit.toLocaleString('id-ID')}</TableCell>
-                                <TableCell>{item?.total.toLocaleString()}</TableCell>
+                                <TableCell className='font-bold' >{item?.total.toLocaleString()}</TableCell>
                             </TableRow>
                             //  <TableRow key="2">
                             //      <TableCell>Kas</TableCell>
