@@ -25,13 +25,7 @@ export const changeTypeAccount = (type: number): string => {
         case 4:
             return 'Pendapatan';
         case 5:
-            return 'Biaya Penjualan';
-        case 6:
-            return 'Pengeluaran';
-        case 7:
-            return 'Pendapatan lain lain';
-        case 8:
-            return 'Biaya lain lain';
+            return 'Beban';
         default:
             return 'Tipe tidak dikenal'; // Mengembalikan nilai default jika tipe tidak ditemukan
     }
