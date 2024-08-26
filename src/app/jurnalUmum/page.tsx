@@ -13,7 +13,7 @@ import { MdOutlineDelete } from 'react-icons/md'
 import { camera } from '../image'
 import { deleteJurnal, downloadJurnal, getJurnalUmum, updateJurnalUmum } from '@/api/transaction'
 import { parseDate } from '@internationalized/date'
-import { formatDate, formatDateStr } from '@/utils/helper'
+import { dateFirst, formatDate, formatDateStr, getFirstDayOfMonth } from '@/utils/helper'
 import useSWR from 'swr'
 import { fetcher } from '@/api/fetcher'
 import { IoClose } from 'react-icons/io5'
@@ -36,9 +36,10 @@ const JurnalUmum = () => {
     const { data } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });
+
     const dateNow = new Date();
     let [date, setDate] = React.useState({
-        start: parseDate((formatDate(dateNow))),
+        start: parseDate((formatDate(dateFirst))),
         end: parseDate((formatDate(dateNow))),
     });
 

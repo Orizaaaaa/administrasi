@@ -53,3 +53,10 @@ export function capitalizeWords(str: string): string {
 
 export const formatDateStr = (dateObj?: { month: number, day: number, year: number }) =>
     dateObj ? `${dateObj.month.toString().padStart(2, '0')}/${dateObj.day.toString().padStart(2, '0')}/${dateObj.year.toString().padStart(4, '0')}` : '';
+
+export const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+};
+
+const dateNow = new Date();
+export const dateFirst = getFirstDayOfMonth(dateNow);
