@@ -43,18 +43,10 @@ const BukuBesar = () => {
             </Card>
 
             {dataTrans.map((data: any, index: number) => {
-                // Inisialisasi total saldo per akun
-                let totalDebit = 0;
-                let totalCredit = 0;
-
-                // Iterasi untuk menghitung total debit dan kredit
-                data.journal_details.forEach((journal: any) => {
-                    totalDebit += journal.debit;
-                    totalCredit += journal.credit;
-                });
-
-                // Hitung saldo total berdasarkan total debit dan kredit
-                const totalSaldo = totalDebit - totalCredit;
+                // Inisialisasi saldo
+                let saldo = 0;
+                let saldoDebit = 0;
+                let saldoCredit = 0;
 
                 return (
                     <div className="mt-7" key={index}>
@@ -70,28 +62,67 @@ const BukuBesar = () => {
                                 <TableColumn>SALDO DEBIT</TableColumn>
                                 <TableColumn>SALDO KREDIT</TableColumn>
                                 <TableColumn>TOTAL</TableColumn>
+
                             </TableHeader>
                             <TableBody>
-                                {data.journal_details.map((journal: any, journalIndex: number) => (
-                                    <TableRow key={journal._id}>
-                                        <TableCell>
-                                            {new Date(journal.journal_date).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell>{data.name}</TableCell>
-                                        <TableCell>{journal.debit.toLocaleString()}</TableCell>
-                                        <TableCell>{journal.credit.toLocaleString()}</TableCell>
-                                        <TableCell>{journal.debit.toLocaleString()}</TableCell>
-                                        <TableCell>{journal.credit.toLocaleString()}</TableCell>
-                                        <TableCell className='font-bold'>
-                                            {journalIndex === data.journal_details.length - 1 ? totalSaldo.toLocaleString() : ''}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {data.journal_details.map((journal: any, journalIndex: number) => {
+                                    saldoDebit = 0;
+                                    saldoCredit = 0;
+
+                                    // Jika ada transaksi debit
+                                    if (journal.debit > 0) {
+                                        if (saldo < 0) {
+                                            // Jika saldo negatif, kurangi dengan debit baru
+                                            saldo += journal.debit;
+                                            if (saldo >= 0) {
+                                                saldoDebit = saldo;
+                                                saldoCredit = 0; // Reset saldo kredit jika saldo menjadi positif
+                                            } else {
+                                                saldoCredit = Math.abs(saldo); // Saldo masih negatif
+                                            }
+                                        } else {
+                                            saldo += journal.debit; // Tambahkan debit ke saldo
+                                            saldoDebit = saldo;
+                                        }
+                                    }
+
+                                    // Jika ada transaksi kredit
+                                    if (journal.credit > 0) {
+                                        saldo -= journal.credit; // Kurangi saldo dengan kredit
+                                        if (saldo >= 0) {
+                                            saldoDebit = saldo; // Tetap di saldo debit jika masih positif
+                                        } else {
+                                            saldoCredit = Math.abs(saldo); // Saldo menjadi negatif, pindah ke saldo kredit
+                                            saldoDebit = 0; // Reset saldo debit
+                                        }
+                                    }
+
+                                    return (
+                                        <TableRow key={journal._id}>
+                                            <TableCell>
+                                                {new Date(journal.journal_date).toLocaleDateString()}
+                                            </TableCell>
+                                            <TableCell>{data.name}</TableCell>
+                                            <TableCell>{journal.debit.toLocaleString()}</TableCell>
+                                            <TableCell>{journal.credit.toLocaleString()}</TableCell>
+                                            <TableCell>
+                                                {saldoDebit > 0 ? saldoDebit.toLocaleString() : ''}
+                                            </TableCell>
+                                            <TableCell>
+                                                {saldoCredit > 0 ? saldoCredit.toLocaleString() : ''}
+                                            </TableCell>
+                                            <TableCell className='font-bold'>
+                                                {journalIndex === data.journal_details.length - 1 ? saldo.toLocaleString() : ''}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </div>
                 );
             })}
+
 
 
         </DefaultLayout>

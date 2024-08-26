@@ -3,7 +3,7 @@ import { GetLabaRugi } from '@/api/transaction'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { changeTypeAccount, dateFirst, formatDate, formatDateStr } from '@/utils/helper'
+import { changeTypeAccount, dateFirst, formatDate, formatDateStr, formatRupiah } from '@/utils/helper'
 import { parseDate } from '@internationalized/date'
 import { DatePicker, DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
 import React, { useEffect } from 'react'
@@ -48,19 +48,23 @@ const LabaRugi = () => {
                 <h1 className='mb-2 font-medium' >Pendapatan</h1>
                 <Table aria-label="Example static collection table">
                     <TableHeader>
+                        <TableColumn>NAMA AKUN</TableColumn>
                         <TableColumn>TIPE AKUN</TableColumn>
-                        <TableColumn>AKUN</TableColumn>
                         <TableColumn>REF</TableColumn>
+                        <TableColumn>DEBIT</TableColumn>
+                        <TableColumn>KREDIT</TableColumn>
                         <TableColumn>JUMLAH</TableColumn>
                     </TableHeader>
                     <TableBody>
 
                         {data?.pendapatan?.map((item: any, index: any) => (
                             <TableRow key={index}>
-                                <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                                 <TableCell> {item.name}</TableCell>
+                                <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                                 <TableCell>{item.account_code}</TableCell>
-                                <TableCell>500.000.000</TableCell>
+                                <TableCell>{item.totalCredit.toLocaleString()}</TableCell>
+                                <TableCell>{item.totalDebit.toLocaleString()}</TableCell>
+                                <TableCell>{item?.total.toLocaleString()} </TableCell>
                             </TableRow>
                         ))}
 
@@ -71,18 +75,22 @@ const LabaRugi = () => {
                 <h1 className='mb-2 font-medium' >Beban</h1>
                 <Table aria-label="Example static collection table">
                     <TableHeader>
+                        <TableColumn>NAMA AKUN</TableColumn>
                         <TableColumn>TIPE AKUN</TableColumn>
-                        <TableColumn>AKUN</TableColumn>
                         <TableColumn>REF</TableColumn>
+                        <TableColumn>DEBIT</TableColumn>
+                        <TableColumn>KREDIT</TableColumn>
                         <TableColumn>JUMLAH</TableColumn>
                     </TableHeader>
                     <TableBody>
                         {data?.beban?.map((item: any, index: any) => (
                             <TableRow key={index}>
-                                <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                                 <TableCell> {item.name}</TableCell>
+                                <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                                 <TableCell>{item.account_code}</TableCell>
-                                <TableCell>500.000.000</TableCell>
+                                <TableCell>{item.totalCredit.toLocaleString()}</TableCell>
+                                <TableCell>{item.totalDebit.toLocaleString('id-ID')}</TableCell>
+                                <TableCell>{item?.total.toLocaleString()}</TableCell>
                             </TableRow>
                             //  <TableRow key="2">
                             //      <TableCell>Kas</TableCell>
@@ -105,7 +113,15 @@ const LabaRugi = () => {
 
             <div className="flex text-lg font-medium mt-4">
                 {/* jika di kredit maka akan menggunakan tanda kurung */}
-                Laba Bersih (Net Profit) = Rp. 1.500.000.000
+                Total Pendapatan = <span className={` ms-1 ${data?.totalBeban < 0 ? 'text-red' : 'text-primary'}`} > {data?.totalBeban.toLocaleString()}</span>
+            </div>
+            <div className="flex text-lg font-medium mt-4">
+                {/* jika di kredit maka akan menggunakan tanda kurung */}
+                Total Beban = <span className={` ms-1 ${data?.totalPendapatan < 0 ? 'text-red' : 'text-primary'}`} > {data?.totalPendapatan.toLocaleString()}</span>
+            </div>
+            <div className="flex text-lg font-medium mt-4">
+                {/* jika di kredit maka akan menggunakan tanda kurung */}
+                Laba Bersih (Net Profit) = <span className={` ms-1 ${data?.labaBersih < 0 ? 'text-red' : 'text-primary'}`} > {data?.labaBersih.toLocaleString()}</span>
             </div>
         </DefaultLayout>
     )

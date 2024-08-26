@@ -43,8 +43,8 @@ const NeracaSaldo = () => {
             </Card>
             <Table aria-label="Example static collection table">
                 <TableHeader>
-                    <TableColumn>TIPE AKUN</TableColumn>
                     <TableColumn>NAMA AKUN</TableColumn>
+                    <TableColumn>TIPE AKUN</TableColumn>
                     <TableColumn>REF</TableColumn>
                     <TableColumn>DEBIT</TableColumn>
                     <TableColumn>KREDIT</TableColumn>
@@ -53,8 +53,8 @@ const NeracaSaldo = () => {
                 <TableBody>
                     {data.map((item: any, index) => (
                         <TableRow key={index}>
-                            <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                             <TableCell>{item.name}</TableCell>
+                            <TableCell>{changeTypeAccount(item.account_type)}</TableCell>
                             <TableCell>{item.account_code}</TableCell>
                             <TableCell>{item.totalDebit.toLocaleString()}</TableCell>
                             <TableCell>{item.totalCredit.toLocaleString()}</TableCell>
