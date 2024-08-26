@@ -52,3 +52,13 @@ export const downloadJurnal = (startDate: string, endDate: string, callback: any
             callback(err);
         });
 }
+
+export const getBukuBesar = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get('/account/accounts-with-journals', { params: { startDate: startDate, endDate: endDate } })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+
+}

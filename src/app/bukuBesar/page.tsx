@@ -1,168 +1,97 @@
 'use client'
+import { getBukuBesar } from '@/api/transaction'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { Autocomplete, AutocompleteItem, DatePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
-import React, { useState } from 'react'
+import { formatDate, formatDateStr } from '@/utils/helper'
+import { parseDate } from '@internationalized/date'
+import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
+import React, { useEffect, useState } from 'react'
 
 const BukuBesar = () => {
-    const [form, setForm] = useState({
-        neraca: ''
-    })
-    const [date, setDate] = useState(null);
-    const handleDropdownSelection = (selectedValue: string, option: string) => {
+    const dateNow = new Date();
+    let [date, setDate] = React.useState({
+        start: parseDate((formatDate(dateNow))),
+        end: parseDate((formatDate(dateNow))),
+    });
+    const startDate = formatDateStr(date.start);
+    const endDate = formatDateStr(date.end);
 
-        setForm((prevForm) => ({
-            ...prevForm,
-            neraca: selectedValue,
-        }));
+    const [dataTrans, setDataTrans] = useState([])
 
-    };
+    useEffect(() => {
+        getBukuBesar(startDate, endDate, (result: any) => {
+            setDataTrans(result.data);
+        });
+    }, [startDate, endDate]);
 
-    const dataDropdown = [
-        { label: "Aset", value: "1", },
-        { label: "Kewajiban", value: "2", },
-        { label: "Modal", value: "3" },
-    ];
+    console.log(dataTrans);
 
     return (
         <DefaultLayout>
             <Card>
                 <h1 className='text-xl font-medium ' >Buku Besar</h1>
                 <p className='text-small text-gray' >Ini adalah halaman besar yang akan mengirim data transaksi ke dalam neraca</p>
-                <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
+                <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-2  ">
                     <ButtonSecondary className=' px-4 rounded-md w-auto'>Download dalam bentuk Excel</ButtonSecondary>
-                    <DatePicker size='sm' onChange={(e: any) => setDate(e)} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg" />
+                    <DateRangePicker
+                        visibleMonths={2}
+                        size='sm' onChange={setDate} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg"
+                    />
                 </div>
             </Card>
-            <div className='mt-7' >
-                <div className="space-y-3 lg:space-y-0 lg:flex gap-2 items-center mb-2 justify-between">
-                    <h1 className='mb-1'>Kas (101)</h1>
-                    <Autocomplete
-                        aria-label='dropdown'
-                        clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, neraca: '' }) }}
-                        onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
-                        defaultItems={dataDropdown}
-                        className="max-w-xs border-2 border-primary rounded-lg "
-                        size='sm'
-                    >
-                        {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                    </Autocomplete>
-                </div>
-                <Table className=' border-hidden' aria-label="Example static collection table">
-                    <TableHeader  >
-                        <TableColumn>TANGGAL</TableColumn>
-                        <TableColumn>KETERANGAN AKUN </TableColumn>
-                        <TableColumn>DEBIT</TableColumn>
-                        <TableColumn>KREDIT</TableColumn>
-                        <TableColumn>SALDO DEBIT</TableColumn>
-                        <TableColumn>SALDO KREDIT</TableColumn>
-                        <TableColumn>TOTAL KAS</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow key="1">
-                            <TableCell>01/01/2024</TableCell>
-                            <TableCell>Kas</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>{''}</TableCell>
-                        </TableRow>
-                        <TableRow key="2">
-                            <TableCell>01/01/2024</TableCell>
-                            <TableCell>Kas</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell className='font-bold' >500.000.000</TableCell>
-                        </TableRow>
+
+            {dataTrans.map((data: any, index: number) => {
+                // Inisialisasi total saldo per akun
+                let totalDebit = 0;
+                let totalCredit = 0;
+
+                // Iterasi untuk menghitung total debit dan kredit
+                data.journal_details.forEach((journal: any) => {
+                    totalDebit += journal.debit;
+                    totalCredit += journal.credit;
+                });
+
+                // Hitung saldo total berdasarkan total debit dan kredit
+                const totalSaldo = totalDebit - totalCredit;
+
+                return (
+                    <div className="mt-7" key={index}>
+                        <div className="space-y-3 lg:space-y-0 lg:flex gap-2 items-center mb-2 justify-between">
+                            <h1 className='mb-1'>{data.name.toUpperCase()} ({data.account_code})</h1>
+                        </div>
+                        <Table className='border-hidden' aria-label={`Table for ${data.name}`}>
+                            <TableHeader>
+                                <TableColumn>TANGGAL</TableColumn>
+                                <TableColumn>NAMA AKUN</TableColumn>
+                                <TableColumn>DEBIT</TableColumn>
+                                <TableColumn>KREDIT</TableColumn>
+                                <TableColumn>SALDO DEBIT</TableColumn>
+                                <TableColumn>SALDO KREDIT</TableColumn>
+                                <TableColumn>TOTAL {data.name.toUpperCase()}</TableColumn>
+                            </TableHeader>
+                            <TableBody>
+                                {data.journal_details.map((journal: any) => (
+                                    <TableRow key={journal._id}>
+                                        <TableCell>01/01/2024</TableCell>
+                                        <TableCell>{data.name}</TableCell>
+                                        <TableCell>{journal.debit}</TableCell>
+                                        <TableCell>{journal.credit}</TableCell>
+                                        <TableCell>{journal.debit}</TableCell>
+                                        <TableCell>{journal.credit}</TableCell>
+                                        <TableCell className='font-bold'>
+                                            {totalSaldo}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                );
+            })}
 
 
-                    </TableBody>
-                </Table>
-            </div>
-
-            <div className='mt-7' >
-                <div className="space-y-3 lg:space-y-0 lg:flex gap-2 items-center mb-2 justify-between">
-                    <h1 className='mb-1'>Modal (301)</h1>
-                    <Autocomplete
-                        aria-label='dropdown'
-                        clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, neraca: '' }) }}
-                        onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
-                        defaultItems={dataDropdown}
-                        className="max-w-xs border-2 border-primary rounded-lg "
-                        size='sm'
-                    >
-                        {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                    </Autocomplete>
-                </div>
-
-                <Table className=' border-hidden' aria-label="Example static collection table">
-                    <TableHeader  >
-                        <TableColumn>TANGGAL</TableColumn>
-                        <TableColumn>KETERANGAN AKUN </TableColumn>
-                        <TableColumn>DEBIT</TableColumn>
-                        <TableColumn>KREDIT</TableColumn>
-                        <TableColumn>SALDO DEBIT</TableColumn>
-                        <TableColumn>SALDO KREDIT</TableColumn>
-                        <TableColumn>TOTAL KAS</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow key="1">
-                            <TableCell>01/01/2024</TableCell>
-                            <TableCell>Modal</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell className='font-bold' >500.000.000</TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
-            <div className='mt-7' >
-                <div className="space-y-3 lg:space-y-0 lg:flex gap-2 items-center mb-2 justify-between">
-                    <h1 className='mb-1'>Pendapatan Pajak ( 303 )</h1>
-                    <Autocomplete
-                        aria-label='dropdown'
-                        clearButtonProps={{ size: 'sm', onClick: () => setForm({ ...form, neraca: '' }) }}
-                        onSelectionChange={(e: any) => handleDropdownSelection(e, 'debit')}
-                        defaultItems={dataDropdown}
-                        className="max-w-xs border-2 border-primary rounded-lg "
-                        size='sm'
-                    >
-                        {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
-                    </Autocomplete>
-                </div>
-                <Table className=' border-hidden' aria-label="Example static collection table">
-                    <TableHeader  >
-                        <TableColumn>TANGGAL</TableColumn>
-                        <TableColumn>KETERANGAN AKUN </TableColumn>
-                        <TableColumn>DEBIT</TableColumn>
-                        <TableColumn>KREDIT</TableColumn>
-                        <TableColumn>SALDO DEBIT</TableColumn>
-                        <TableColumn>SALDO KREDIT</TableColumn>
-                        <TableColumn>TOTAL KAS</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow key="1">
-                            <TableCell>01/01/2024</TableCell>
-                            <TableCell>Pendapatan Pajak</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell>{''}</TableCell>
-                            <TableCell>500.000.000</TableCell>
-                            <TableCell className='font-bold' >500.000.000</TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
-            <div className="flex justify-end mt-7">
-                <ButtonPrimary className='py-2 px-4 rounded-md' >Masukan ke dalam neraca</ButtonPrimary>
-            </div>
         </DefaultLayout>
 
     )

@@ -32,6 +32,7 @@ interface ItemData {
 }
 
 const JurnalUmum = () => {
+    //bug onchange  date
     const { data } = useSWR(`${url}/account/list`, fetcher, {
         keepPreviousData: true,
     });
