@@ -6,7 +6,7 @@ import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { formatDate, formatDateStr } from '@/utils/helper'
 import { parseDate } from '@internationalized/date'
-import { Autocomplete, AutocompleteItem, DatePicker, DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
+import { DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 
 const BukuBesar = () => {
