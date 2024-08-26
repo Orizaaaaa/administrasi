@@ -4,7 +4,7 @@ import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
-import { formatDate, formatDateStr } from '@/utils/helper'
+import { dateFirst, formatDate, formatDateStr } from '@/utils/helper'
 import { parseDate } from '@internationalized/date'
 import { DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react'
 const BukuBesar = () => {
     const dateNow = new Date();
     let [date, setDate] = React.useState({
-        start: parseDate((formatDate(dateNow))),
+        start: parseDate((formatDate(dateFirst))),
         end: parseDate((formatDate(dateNow))),
     });
     const startDate = formatDateStr(date.start);
@@ -69,19 +69,21 @@ const BukuBesar = () => {
                                 <TableColumn>KREDIT</TableColumn>
                                 <TableColumn>SALDO DEBIT</TableColumn>
                                 <TableColumn>SALDO KREDIT</TableColumn>
-                                <TableColumn>TOTAL {data.name.toUpperCase()}</TableColumn>
+                                <TableColumn>TOTAL</TableColumn>
                             </TableHeader>
                             <TableBody>
-                                {data.journal_details.map((journal: any) => (
+                                {data.journal_details.map((journal: any, journalIndex: number) => (
                                     <TableRow key={journal._id}>
-                                        <TableCell>01/01/2024</TableCell>
+                                        <TableCell>
+                                            {new Date(journal.journal_date).toLocaleDateString()}
+                                        </TableCell>
                                         <TableCell>{data.name}</TableCell>
                                         <TableCell>{journal.debit}</TableCell>
                                         <TableCell>{journal.credit}</TableCell>
                                         <TableCell>{journal.debit}</TableCell>
                                         <TableCell>{journal.credit}</TableCell>
                                         <TableCell className='font-bold'>
-                                            {totalSaldo}
+                                            {journalIndex === data.journal_details.length - 1 ? totalSaldo.toLocaleString() : ''}
                                         </TableCell>
                                     </TableRow>
                                 ))}
