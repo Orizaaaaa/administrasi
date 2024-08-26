@@ -59,7 +59,7 @@ const NeracaSaldo = () => {
                             <TableCell>{item.totalDebit.toLocaleString()}</TableCell>
                             <TableCell>{item.totalCredit.toLocaleString()}</TableCell>
                             <TableCell className='font-bold'>
-                                {item.totalDebit - item.totalCredit}
+                                {(Number(item.totalDebit || 0) - Number(item.totalCredit || 0)).toLocaleString()}
                             </TableCell>
                         </TableRow>
                     ))}
