@@ -62,3 +62,12 @@ export const getBukuBesar = (startDate: string, endDate: string, callback: any) 
         });
 
 }
+export const getNeraca = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get('/balance/total-balance', { params: { startDate: startDate, endDate: endDate } })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+
+}
