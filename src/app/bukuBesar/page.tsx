@@ -78,10 +78,10 @@ const BukuBesar = () => {
                                             {new Date(journal.journal_date).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>{data.name}</TableCell>
-                                        <TableCell>{journal.debit}</TableCell>
-                                        <TableCell>{journal.credit}</TableCell>
-                                        <TableCell>{journal.debit}</TableCell>
-                                        <TableCell>{journal.credit}</TableCell>
+                                        <TableCell>{journal.debit.toLocaleString()}</TableCell>
+                                        <TableCell>{journal.credit.toLocaleString()}</TableCell>
+                                        <TableCell>{journal.debit.toLocaleString()}</TableCell>
+                                        <TableCell>{journal.credit.toLocaleString()}</TableCell>
                                         <TableCell className='font-bold'>
                                             {journalIndex === data.journal_details.length - 1 ? totalSaldo.toLocaleString() : ''}
                                         </TableCell>
