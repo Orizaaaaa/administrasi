@@ -69,7 +69,7 @@ const CatatTransaksi = () => {
                 account: '',
                 debit: 0, // Updated to number
                 credit: 0, // Updated to number
-                note: "This is a note for the journal entry."
+                note: ""
             },
         ],
         data_change: false,
@@ -101,7 +101,7 @@ const CatatTransaksi = () => {
             ...prevForm,
             detail: [
                 ...prevForm.detail,
-                { account: '', debit: 0, credit: 0, note: 'This is a note for the journal entry.' },
+                { account: '', debit: 0, credit: 0, note: '' },
             ],
         }));
     };
@@ -171,7 +171,7 @@ const CatatTransaksi = () => {
                                 account: '',
                                 debit: 0, // Updated to number
                                 credit: 0, // Updated to number
-                                note: "This is a note for the journal entry."
+                                note: ""
                             },
                         ],
                         data_change: false,
@@ -242,9 +242,20 @@ const CatatTransaksi = () => {
                                         onChange={(e: any) => handleChange(e, index)}
                                         value={trans.credit}
                                     />
+
                                     <IoClose onClick={() => handleRemoveTransaction(index)} className="cursor-pointer" color='red' />
                                 </div>
+
                             </div>
+
+                            <InputForm
+                                className='bg-bone'
+                                htmlFor="note"
+                                title="Note (opsional)"
+                                type="text"
+                                onChange={(e: any) => handleChange(e, index)}
+                                value={trans.note}
+                            />
                         </div>
                     ))}
 

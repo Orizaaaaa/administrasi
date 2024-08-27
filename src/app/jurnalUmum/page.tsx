@@ -443,6 +443,14 @@ const JurnalUmum = () => {
                                         <IoClose onClick={() => handleRemoveTransaction(index)} className="cursor-pointer" color='red' />
                                     </div>
                                 </div>
+                                <InputForm
+                                    className='bg-bone'
+                                    htmlFor="note"
+                                    title="Note (opsional)"
+                                    type="text"
+                                    onChange={(e: any) => handleChange(e, index)}
+                                    value={trans.note}
+                                />
                             </div>
                         ))}
 
