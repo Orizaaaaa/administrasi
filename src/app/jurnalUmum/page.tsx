@@ -369,11 +369,11 @@ const JurnalUmum = () => {
                                             </ButtonPrimary> : ''}
                                     </TableCell>
                                     <TableCell>{firstEntryName ? item.name : ''}</TableCell>
-                                    <TableCell>{detail.account.name}</TableCell>
+                                    <TableCell>{detail.account?.name}</TableCell>
                                     <TableCell>{detail.note}</TableCell>
-                                    <TableCell>{detail.account.account_code}</TableCell>
-                                    <TableCell>{detail.debit.toLocaleString()}</TableCell>
-                                    <TableCell>{detail.credit.toLocaleString()}</TableCell>
+                                    <TableCell>{detail.account?.account_code}</TableCell>
+                                    <TableCell>{detail?.debit.toLocaleString()}</TableCell>
+                                    <TableCell>{detail?.credit.toLocaleString()}</TableCell>
                                     <TableCell>
                                         <div className="flex w-full justify-start gap-2 items-center">
                                             <button onClick={() => modalOpen(item)} >
