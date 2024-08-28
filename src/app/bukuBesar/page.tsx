@@ -90,7 +90,7 @@ const BukuBesar = () => {
             <div className="flex mt-4 justify-end">
                 <Autocomplete
                     aria-label='dropdown'
-                    placeholder='filter berdasarkan akun'
+                    placeholder='Filter berdasarkan akun'
                     onSelectionChange={onSelectionChange}
                     defaultItems={dataDropdown}
                     className=" w-[100%] lg:max-w-xs border-2 border-primary rounded-lg"
