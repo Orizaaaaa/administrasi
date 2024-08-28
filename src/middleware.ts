@@ -21,5 +21,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/dashboardsd/:path*'], // Define paths where the middleware should be applied
+    matcher: ['/dashboard/:path*', '/bukuBesar/:path*', '/catatTransaksi/:path*',
+        '/jurnalPenutupan/:path*', '/jurnalUmum/:path*', '/labaRugi/:path*', '/listAccount/:path*', '/neracaSaldo/:path*',], // Define paths where the middleware should be applied
 };
