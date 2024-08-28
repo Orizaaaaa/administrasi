@@ -1,32 +1,77 @@
 'use client'
-import { getBukuBesar } from '@/api/transaction'
+import { downloadBukuBesar, getBukuBesar } from '@/api/transaction'
 import ButtonPrimary from '@/components/elements/buttonPrimary'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
 import { dateFirst, formatDate, formatDateStr } from '@/utils/helper'
 import { parseDate } from '@internationalized/date'
-import { DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 
+interface DropdownItem {
+    label: string;
+    value: string;
+}
+
+interface ItemData {
+    _id: string;
+    name: string;
+}
 const BukuBesar = () => {
     const dateNow = new Date();
     let [date, setDate] = React.useState({
         start: parseDate((formatDate(dateFirst))),
         end: parseDate((formatDate(dateNow))),
     });
+    const [dropdownFilter, setDropdownFilter] = useState([]);
     const startDate = formatDateStr(date.start);
     const endDate = formatDateStr(date.end);
 
-    const [dataTrans, setDataTrans] = useState([])
+    const [dataTransOriginal, setDataTransOriginal] = useState([]); // Data asli
+    const [filteredData, setFilteredData] = useState([]); // Data yang sudah difilter
 
     useEffect(() => {
         getBukuBesar(startDate, endDate, (result: any) => {
-            setDataTrans(result.data);
+            setDataTransOriginal(result.data); // Simpan data asli
+            setFilteredData(result.data); // Tampilkan semua data secara default
+            setDropdownFilter(result.data);
         });
     }, [startDate, endDate]);
 
-    console.log(dataTrans);
+    const onSelectionChange = (id: any) => {
+        // Filter data berdasarkan name yang dipilih
+        const filtered = dataTransOriginal.filter((item: ItemData) => item.name === id);
+        setFilteredData(filtered.length ? filtered : dataTransOriginal); // Tampilkan data yang cocok atau kembalikan ke semua data
+    };
+
+
+    const dataDropdown: DropdownItem[] = (dropdownFilter || []).map((item: ItemData) => ({
+        label: item.name,
+        value: item.name
+    }));
+
+
+    const handleDownload = () => {
+        downloadBukuBesar(startDate, endDate, (result: any) => {
+            if (result instanceof Blob) {
+                // Jika hasil adalah Blob, kita lanjutkan dengan download
+                const url = window.URL.createObjectURL(result);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Buku-Besar-${startDate}-${endDate}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                console.log('Download success');
+            } else {
+                // Jika tidak, anggap itu sebagai error
+                console.error('Download failed:', result);
+            }
+        });
+    };
+
 
     return (
         <DefaultLayout>
@@ -34,7 +79,7 @@ const BukuBesar = () => {
                 <h1 className='text-xl font-medium ' >Buku Besar</h1>
                 <p className='text-small text-gray' >Ini adalah halaman besar yang akan mengirim data transaksi ke dalam neraca</p>
                 <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-2  ">
-                    <ButtonSecondary className=' px-4 rounded-md w-auto'>Download dalam bentuk Excel</ButtonSecondary>
+                    <ButtonSecondary onClick={handleDownload} className=' px-4 rounded-md w-auto'>Download dalam bentuk Excel</ButtonSecondary>
                     <DateRangePicker
                         visibleMonths={2}
                         size='sm' onChange={setDate} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg"
@@ -42,7 +87,21 @@ const BukuBesar = () => {
                 </div>
             </Card>
 
-            {dataTrans.map((data: any, index: number) => {
+            <div className="flex mt-4 justify-end">
+                <Autocomplete
+                    aria-label='dropdown'
+                    placeholder='filter berdasarkan akun'
+                    onSelectionChange={onSelectionChange}
+                    defaultItems={dataDropdown}
+                    className=" w-[100%] lg:max-w-xs border-2 border-primary rounded-lg"
+                    size='sm'
+                >
+                    {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
+                </Autocomplete>
+            </div>
+
+
+            {filteredData.map((data: any, index: number) => {
                 // Inisialisasi saldo
                 let saldo = 0;
                 let saldoDebit = 0;
@@ -53,6 +112,7 @@ const BukuBesar = () => {
                         <div className="space-y-3 lg:space-y-0 lg:flex gap-2 items-center mb-2 justify-between">
                             <h1 className='mb-1'>{data.name.toUpperCase()} ({data.account_code})</h1>
                         </div>
+
                         <Table className='border-hidden' aria-label={`Table for ${data.name}`}>
                             <TableHeader>
                                 <TableColumn>TANGGAL</TableColumn>

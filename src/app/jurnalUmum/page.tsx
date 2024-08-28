@@ -307,7 +307,6 @@ const JurnalUmum = () => {
     console.log(dataTrans);
     console.log(total);
 
-
     return (
         <DefaultLayout>
             <Card>

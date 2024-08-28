@@ -52,6 +52,17 @@ export const downloadJurnal = (startDate: string, endDate: string, callback: any
             callback(err);
         });
 }
+export const downloadBukuBesar = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get(`/balance/export-buku-besar`, {
+        params: { startDate, endDate },
+        responseType: 'blob'  // Mengharapkan response sebagai Blob (file)
+    })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+}
 
 export const getBukuBesar = (startDate: string, endDate: string, callback: any) => {
     axiosInterceptor.get('/account/accounts-with-journals', { params: { startDate: startDate, endDate: endDate } })
