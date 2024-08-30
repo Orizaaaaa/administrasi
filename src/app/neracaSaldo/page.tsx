@@ -1,6 +1,6 @@
 'use client'
 
-import { getNeraca } from '@/api/transaction'
+import { downloadNeraca, getNeraca } from '@/api/transaction'
 import ButtonSecondary from '@/components/elements/buttonSecondary'
 import Card from '@/components/elements/card/Card'
 import DefaultLayout from '@/components/layouts/DefaultLayout'
@@ -28,13 +28,34 @@ const NeracaSaldo = () => {
         });
     }, [startDate, endDate]);
 
+    const handleDownload = () => {
+        downloadNeraca(startDate, endDate, (result: any) => {
+            if (result instanceof Blob) {
+                // Jika hasil adalah Blob, kita lanjutkan dengan download
+                const url = window.URL.createObjectURL(result);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Neraca-${startDate}-${endDate}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                console.log('Download success');
+            } else {
+                // Jika tidak, anggap itu sebagai error
+                console.error('Download failed:', result);
+            }
+        });
+    };
+
+
     return (
         <DefaultLayout>
             <Card className='mb-4' >
                 <h1>Neraca Saldo</h1>
                 <p className='text-small text-gray' >Untuk menghitung total perbulan nya</p>
                 <div className="space-y-3 lg:space-y-0 lg:flex  justify-end gap-2 mt-3 lg:mt-0">
-                    <ButtonSecondary className=' px-4 rounded-md w-auto'>Download dalam bentuk Excel</ButtonSecondary>
+                    <ButtonSecondary onClick={handleDownload} className=' px-4 rounded-md w-auto'>Download dalam bentuk Excel</ButtonSecondary>
                     <DateRangePicker
                         visibleMonths={2}
                         size='sm' onChange={setDate} value={date} aria-label='datepicker' className="max-w-[284px] bg-bone border-2 border-primary rounded-lg"

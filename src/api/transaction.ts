@@ -63,6 +63,17 @@ export const downloadBukuBesar = (startDate: string, endDate: string, callback: 
             callback(err);
         });
 }
+export const downloadNeraca = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get(`/balance/export-neraca`, {
+        params: { startDate, endDate },
+        responseType: 'blob'  // Mengharapkan response sebagai Blob (file)
+    })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+}
 
 export const getBukuBesar = (startDate: string, endDate: string, callback: any) => {
     axiosInterceptor.get('/account/accounts-with-journals', { params: { startDate: startDate, endDate: endDate } })
