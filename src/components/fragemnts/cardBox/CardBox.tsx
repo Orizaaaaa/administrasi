@@ -1,4 +1,4 @@
-import { money } from '@/app/image'
+
 import Card from '@/components/elements/card/Card'
 import Image from 'next/image'
 import React from 'react'

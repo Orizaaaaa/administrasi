@@ -74,6 +74,17 @@ export const downloadNeraca = (startDate: string, endDate: string, callback: any
             callback(err);
         });
 }
+export const downloadLabaRugi = (startDate: string, endDate: string, callback: any) => {
+    axiosInterceptor.get(`/balance/export-pendapatan-beban`, {
+        params: { startDate, endDate },
+        responseType: 'blob'  // Mengharapkan response sebagai Blob (file)
+    })
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
+}
 
 export const getBukuBesar = (startDate: string, endDate: string, callback: any) => {
     axiosInterceptor.get('/account/accounts-with-journals', { params: { startDate: startDate, endDate: endDate } })
@@ -101,4 +112,13 @@ export const GetLabaRugi = (startDate: string, endDate: string, callback: any) =
             callback(err);
         });
 
+}
+
+export const getDataCart = (callback: any) => {
+    axiosInterceptor.get('/balance/finance-data')
+        .then((result) => {
+            callback(result.data)
+        }).catch((err) => {
+            callback(err);
+        });
 }

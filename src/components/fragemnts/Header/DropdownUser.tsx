@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -5,8 +6,14 @@ import { capitalizeWords } from "@/utils/helper";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const name = typeof window !== 'undefined' ? localStorage.getItem('name') : null;
-  const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+  const [name, setName] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  // Mengambil data dari localStorage setelah komponen dirender di client
+  useEffect(() => {
+    setName(localStorage.getItem('name'));
+    setRole(localStorage.getItem('role'));
+  }, []);
+
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
 

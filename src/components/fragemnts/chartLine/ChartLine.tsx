@@ -1,9 +1,15 @@
 'use client'
 
 import { ApexOptions } from "apexcharts";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import dynamic from 'next/dynamic';
+import useSWR from "swr";
+import { url } from "@/api/auth";
+import { fetcher } from "@/api/fetcher";
+import { getDataCart } from "@/api/transaction";
+
+
 
 const options: ApexOptions = {
     legend: {
@@ -114,7 +120,7 @@ const options: ApexOptions = {
             },
         },
         min: 0,
-        max: 500,
+        max: undefined,
     },
 };
 
@@ -130,15 +136,43 @@ const ChartLine: React.FC = () => {
         series: [
             {
                 name: "Pendapatan",
-                data: [23, 11, 22, 27, 13, 168, 200, 21, 44, 22, 300, 45],
+                data: new Array(12).fill(0), // 12 bulan dengan nilai default 0
             },
-
             {
                 name: "Pengeluaran",
-                data: [30, 25, 36, 260, 45, 35, 64, 52, 59, 36, 39, 51],
+                data: new Array(12).fill(0), // 12 bulan dengan nilai default 0
             },
         ],
     });
+
+    useEffect(() => {
+        getDataCart((data: any) => {
+            console.log('nih bang', data);
+
+            // Inisialisasi data dengan 12 bulan berisi 0
+            const defaultData = new Array(12).fill(0);
+
+            // Map data dari API ke format yang diinginkan
+            const mappedData = data.dataCart.map((item: any) => {
+                // Salin data default
+                const dataArray = [...defaultData];
+                // Isi data yang ada dari API
+                item.data.forEach((value: number, index: number) => {
+                    dataArray[index] = value;
+                });
+                return {
+                    name: item.name,
+                    data: dataArray,
+                };
+            });
+
+            setState({
+                series: mappedData
+            });
+        });
+    }, []);
+
+
 
     const handleReset = () => {
         setState((prevState) => ({
@@ -146,6 +180,25 @@ const ChartLine: React.FC = () => {
         }));
     };
     handleReset;
+
+
+
+    // Mendapatkan tanggal hari ini
+    const today = new Date();
+
+    // Mendapatkan awal tahun
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+    // Mendapatkan akhir tahun
+    const endOfYear = new Date(today.getFullYear(), 11, 31);
+
+    // Fungsi untuk memformat tanggal menjadi dd.mm.yyyy
+    const formatDate = (date: Date): string => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+    };
 
     return (
         <div className="col-span-12 mt-5 rounded-lg bg-white px-5 pb-5 pt-7.5 shadow-defaultsm:px-7.5 xl:col-span-8 ">
@@ -157,7 +210,7 @@ const ChartLine: React.FC = () => {
                         </span>
                         <div className="w-full">
                             <p className="font-semibold text-primary">Total Pendapatan</p>
-                            <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+                            <p className="text-sm font-medium"> {formatDate(startOfYear)} - {formatDate(endOfYear)}</p>
                         </div>
                     </div>
                     <div className="flex min-w-47.5">
@@ -166,7 +219,7 @@ const ChartLine: React.FC = () => {
                         </span>
                         <div className="w-full">
                             <p className="font-semibold text-red">Total Pengeluaran</p>
-                            <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+                            <p className="text-sm font-medium"> {formatDate(startOfYear)} - {formatDate(endOfYear)}</p>
                         </div>
                     </div>
                 </div>
