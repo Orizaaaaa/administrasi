@@ -71,7 +71,7 @@ const NeracaSaldo = () => {
                     <TableColumn>KREDIT</TableColumn>
                     <TableColumn>TOTAL</TableColumn>
                 </TableHeader>
-                <TableBody>
+                <TableBody emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}>
                     {data.map((item: any, index) => (
                         <TableRow key={index}>
                             <TableCell>{item.name}</TableCell>

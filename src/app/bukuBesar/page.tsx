@@ -127,7 +127,7 @@ const BukuBesar = () => {
                                 <TableColumn>TOTAL</TableColumn>
 
                             </TableHeader>
-                            <TableBody>
+                            <TableBody emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}>
                                 {data.journal_details.map((journal: any, journalIndex: number) => {
                                     saldoDebit = 0;
                                     saldoCredit = 0;

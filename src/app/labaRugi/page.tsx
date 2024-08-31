@@ -74,7 +74,7 @@ const LabaRugi = () => {
                         <TableColumn>KREDIT</TableColumn>
                         <TableColumn>JUMLAH</TableColumn>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}>
 
                         {data?.pendapatan?.map((item: any, index: any) => (
                             <TableRow key={index}>

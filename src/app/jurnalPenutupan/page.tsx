@@ -171,7 +171,9 @@ const JurnalPenutupan = () => {
                         <TableColumn>DEBIT</TableColumn>
                         <TableColumn>KREDIT</TableColumn>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody
+                        emptyContent={`Tidak ada transaksi di ${date.start} - ${date.end}`}
+                    >
                         {renderRows()}
                     </TableBody>
                 </Table>
