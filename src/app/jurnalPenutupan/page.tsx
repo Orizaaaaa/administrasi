@@ -126,13 +126,9 @@ const JurnalPenutupan = () => {
                             setData(result.data || []);
                         });
                         setLoading(false);
+                        onClose();
                     }
-
                 })
-
-
-                //edit ini nanti bosss
-                setLoading(false);
 
             } catch (error) {
                 console.error('Error downloading files:', error);
@@ -142,8 +138,6 @@ const JurnalPenutupan = () => {
         downloadAll();
     };
 
-
-    console.log(data);
 
     return (
         <DefaultLayout>
@@ -189,7 +183,7 @@ const JurnalPenutupan = () => {
                 akan menutup semua transaksi yang ada
                 <div className="flex justify-end">
                     <div className="flex gap-3">
-                        <ButtonPrimary onClick={() => handleClosingJournal(startDate, endDate)} className='py-1 px-4 rounded-md'>
+                        <ButtonPrimary disabled={loading ? true : false} onClick={() => handleClosingJournal(startDate, endDate)} className='py-1 px-4 rounded-md'>
                             {loading ? <Spinner className={`w-5 h-5 `} size="sm" color="white" /> : 'Ya'}
                         </ButtonPrimary>
                         <ButtonSecondary onClick={onClose} className='py-1 px-4 rounded-md'>Tidak</ButtonSecondary>

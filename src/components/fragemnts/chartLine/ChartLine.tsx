@@ -153,7 +153,7 @@ const ChartLine: React.FC = () => {
             const defaultData = new Array(12).fill(0);
 
             // Map data dari API ke format yang diinginkan
-            const mappedData = data.dataCart.map((item: any) => {
+            const mappedData = data?.dataCart?.map((item: any) => {
                 // Salin data default
                 const dataArray = [...defaultData];
                 // Isi data yang ada dari API

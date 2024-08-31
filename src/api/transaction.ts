@@ -123,13 +123,12 @@ export const getDataCart = (callback: any) => {
         });
 }
 
-export const deleteAllJournal = async (callback: any) => {
-    await axiosInterceptor.delete('/journal//delete-all-journals')
-        .then((result) => {
-            callback(result.data)
-        }).catch((err) => {
-            callback(err);
-            console.log(err);
-
-        });
+export const deleteAllJournal = async (callback: (result: any) => void) => {
+    try {
+        const result = await axiosInterceptor.delete('/journal/delete-all-journals');
+        callback(result.data);
+    } catch (err) {
+        callback(err);
+        console.log(err);
+    }
 }
