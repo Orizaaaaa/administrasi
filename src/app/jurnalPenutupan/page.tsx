@@ -1,15 +1,18 @@
 'use client';
-import { getBukuBesar } from '@/api/transaction';
+import { deleteAllJournal, downloadBukuBesar, downloadJurnal, downloadLabaRugi, downloadNeraca, getBukuBesar } from '@/api/transaction';
 import ButtonPrimary from '@/components/elements/buttonPrimary';
 import ButtonSecondary from '@/components/elements/buttonSecondary';
 import Card from '@/components/elements/card/Card';
+import ModalAlert from '@/components/fragemnts/modal/modalAlert';
 import DefaultLayout from '@/components/layouts/DefaultLayout';
 import { dateFirst, formatDate, formatDateStr } from '@/utils/helper';
 import { parseDate } from '@internationalized/date';
-import { DateRangePicker, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { DateRangePicker, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
 import React, { useEffect } from 'react';
 
 const JurnalPenutupan = () => {
+    const [loading, setLoading] = React.useState(false);
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const dateNow = new Date();
     const [data, setData] = React.useState([]);
     const [date, setDate] = React.useState({
@@ -83,10 +86,64 @@ const JurnalPenutupan = () => {
         ));
     };
 
+    const downloadFile = (data: Blob, filename: string) => {
+        const url = window.URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    };
+
+
+    const handleOpenModal = () => {
+        onOpen();
+    }
+
+    const handleClosingJournal = (startDate: string, endDate: string) => {
+        setLoading(true);
+        const downloadAll = async () => {
+            try {
+                const [jurnalBlob, bukuBesarBlob, neracaBlob, labaRugiBlob] = await Promise.all([
+                    new Promise<Blob>((resolve) => downloadJurnal(startDate, endDate, resolve)),
+                    new Promise<Blob>((resolve) => downloadBukuBesar(startDate, endDate, resolve)),
+                    new Promise<Blob>((resolve) => downloadNeraca(startDate, endDate, resolve)),
+                    new Promise<Blob>((resolve) => downloadLabaRugi(startDate, endDate, resolve))
+                ]);
+
+                // Download file dengan nama yang sesuai
+                downloadFile(jurnalBlob, 'jurnal penutupan-(jurnal).xlsx');
+                downloadFile(bukuBesarBlob, 'jurnal penutupan-(buku_besar).xlsx');
+                downloadFile(neracaBlob, 'jurnal penutupan-(neraca).xlsx');
+                downloadFile(labaRugiBlob, 'jurnal penutupan-(laba_rugi).xlsx');
+
+                deleteAllJournal((result: any) => {
+                    console.log('delete bos', result);
+
+                    if (result) {
+                        getBukuBesar(startDate, endDate, (result: any) => {
+                            setData(result.data || []);
+                        });
+                        setLoading(false);
+                    }
+
+                })
+
+
+                //edit ini nanti bosss
+                setLoading(false);
+
+            } catch (error) {
+                console.error('Error downloading files:', error);
+            }
+        };
+
+        downloadAll();
+    };
 
 
     console.log(data);
-
 
     return (
         <DefaultLayout>
@@ -119,11 +176,24 @@ const JurnalPenutupan = () => {
                     </TableBody>
                 </Table>
                 <div className="flex justify-end mt-4">
-                    <ButtonPrimary className='py-2 px-4 rounded-md'>
+                    <ButtonPrimary onClick={handleOpenModal} className='py-2 px-4 rounded-md'>
                         Buat jurnal penutupan
                     </ButtonPrimary>
                 </div>
             </div>
+
+            <ModalAlert isOpen={isOpen} onClose={onClose} >
+                Apakah anda yakin akan melakukan penutupan akun dari {startDate} sampai {endDate}, perlu di ingat bahwa penutupan jurnal
+                akan menutup semua transaksi yang ada
+                <div className="flex justify-end">
+                    <div className="flex gap-3">
+                        <ButtonPrimary onClick={() => handleClosingJournal(startDate, endDate)} className='py-1 px-4 rounded-md'>
+                            {loading ? <Spinner className={`w-5 h-5 `} size="sm" color="white" /> : 'Ya'}
+                        </ButtonPrimary>
+                        <ButtonSecondary onClick={onClose} className='py-1 px-4 rounded-md'>Tidak</ButtonSecondary>
+                    </div>
+                </div>
+            </ModalAlert>
         </DefaultLayout>
     );
 };
