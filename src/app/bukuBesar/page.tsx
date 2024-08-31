@@ -73,6 +73,9 @@ const BukuBesar = () => {
     };
 
 
+    console.log(dataTransOriginal);
+
+
     return (
         <DefaultLayout>
             <Card>
@@ -158,7 +161,7 @@ const BukuBesar = () => {
                                     }
 
                                     return (
-                                        <TableRow key={journal._id}>
+                                        <TableRow key={index + '-' + journalIndex}>
                                             <TableCell>
                                                 {new Date(journal.journal_date).toLocaleDateString()}
                                             </TableCell>
